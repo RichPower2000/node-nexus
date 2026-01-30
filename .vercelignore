@@ -1,0 +1,19 @@
+# Archivos a ignorar en el despliegue
+node_modules/
+.git/
+.vercel/
+.kiro/
+.qoder/
+backend/tests/
+tests/
+*.md
+!README.md
+*.txt
+*.log
+.env.local
+.env.development
+.env
+test-*.js
+enviar-liquidez.js
+dashboard-advanced.html
+INICIAR-NODO.bat

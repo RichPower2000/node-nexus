@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - Dashboard Operativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Manrope:wght@200;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #020617;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+        }
+
+        .sidebar {
+            width: 80px;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar:hover {
+            width: 260px;
+        }
+
+        .sidebar:hover .nav-text {
+            opacity: 1;
+            display: inline-block;
+        }
+
+        .nav-text {
+            opacity: 0;
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        @keyframes pulse-soft {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .status-pulse {
+            animation: pulse-soft 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="flex">
+    <!-- Sidebar -->
+    <aside
+        class="sidebar h-screen sticky top-0 bg-slate-950 border-r border-white/5 flex flex-col items-center py-8 z-50">
+        <div class="mb-12">
+            <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+        </div>
+
+        <nav class="flex flex-col gap-8 w-full px-4">
+            <a href="#" class="flex items-center gap-4 text-blue-500 bg-blue-500/10 p-3 rounded-xl">
+                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="nav-text font-semibold uppercase tracking-widest text-xs">Dashboard</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-4 text-slate-400 hover:text-white transition-colors p-3 rounded-xl">
+                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="nav-text font-semibold uppercase tracking-widest text-xs">Liquidez</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-4 text-slate-400 hover:text-white transition-colors p-3 rounded-xl">
+                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 002-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="nav-text font-semibold uppercase tracking-widest text-xs">Historial</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-4 text-slate-400 hover:text-white transition-colors p-3 rounded-xl">
+                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <span class="nav-text font-semibold uppercase tracking-widest text-xs">Ajustes</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto mb-8 w-full px-4">
+            <button onclick="logout()"
+                class="flex items-center gap-4 text-red-400 hover:text-red-300 transition-colors p-3 rounded-xl w-full">
+                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="nav-text font-semibold uppercase tracking-widest text-xs">Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 lg:p-12 max-w-7xl mx-auto w-full">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div>
+                <h2 class="text-4xl font-extrabold tracking-tight">Panel de Control</h2>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full status-pulse"></span>
+                    <p class="text-slate-400 text-sm font-medium tracking-wide uppercase">NODO OPERACIONAL: <span
+                            id="operatorDisplay" class="text-blue-400">NEXUS-ADMIN</span></p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="glass-card px-6 py-3 rounded-2xl flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Capacidad Total</p>
+                        <p class="stat-value text-xl">S/. 1,000,000M</p>
+                    </div>
+                    <div class="w-px h-8 bg-white/10"></div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Uptime</p>
+                        <p id="uptime" class="stat-value text-xl text-blue-400">00:00:00</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -mr-8 -mt-8 transition-all group-hover:scale-110">
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Volumen 24h</p>
+                <h3 id="totalVolume" class="stat-value text-3xl mb-1">S/. 0.00</h3>
+                <p class="text-green-500 text-xs font-bold">+12% vs ayer</p>
+            </div>
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-8 -mt-8 transition-all group-hover:scale-110">
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Éxito Tx</p>
+                <h3 id="successRate" class="stat-value text-3xl mb-1">0.00%</h3>
+                <p class="text-slate-400 text-xs font-bold">99.9% Latencia Opt.</p>
+            </div>
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full -mr-8 -mt-8 transition-all group-hover:scale-110">
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Transacciones</p>
+                <h3 id="txCount" class="stat-value text-3xl mb-1">0</h3>
+                <p class="text-slate-400 text-xs font-bold">Procesamiento Real</p>
+            </div>
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full -mr-8 -mt-8 transition-all group-hover:scale-110">
+                </div>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Comisiones (Net)</p>
+                <h3 id="totalFees" class="stat-value text-3xl mb-1">S/. 0.00</h3>
+                <p class="text-purple-400 text-xs font-bold">Spread Operativo</p>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Charts & Pools -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Liquidity Pools Card -->
+                <div class="glass-card p-8 rounded-[2rem]">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="text-2xl font-bold tracking-tight">Pools de Liquidez</h3>
+                            <p class="text-slate-400 text-sm">Distribución en tiempo real por plataforma</p>
+                        </div>
+                        <button onclick="rebalancePools()"
+                            class="text-xs font-bold text-blue-400 hover:text-blue-300 uppercase tracking-widest px-4 py-2 border border-blue-400/20 rounded-lg hover:bg-blue-400/5 transition-all">
+                            Rebalancear
+                        </button>
+                    </div>
+
+                    <div id="poolsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Pools dynamically loaded here -->
+                        <div class="animate-pulse flex space-x-4">
+                            <div class="flex-1 space-y-4 py-1">
+                                <div class="h-4 bg-slate-800 rounded w-3/4"></div>
+                                <div class="space-y-2">
+                                    <div class="h-10 bg-slate-800 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Chart -->
+                <div class="glass-card p-8 rounded-[2rem]">
+                    <h3 class="text-2xl font-bold tracking-tight mb-8">Flujo de Liquidez</h3>
+                    <div class="h-64">
+                        <canvas id="liquidityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Quick Transfer & Recent Activity -->
+            <div class="space-y-8">
+                <!-- Action Card -->
+                <div class="glass-card p-8 rounded-[2rem] bg-gradient-to-br from-blue-600/10 to-transparent">
+                    <h3 class="text-2xl font-bold tracking-tight mb-6">Ejecutar Liquidación</h3>
+                    <form id="transferForm" class="space-y-4">
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Plataforma</label>
+                            <select id="platform"
+                                class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500/50">
+                                <option value="yape">YAPE</option>
+                                <option value="plin">PLIN</option>
+                                <option value="bcp">BCP (Cuenta)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Destino
+                                (Celular/Cuenta)</label>
+                            <input type="text" id="destination" placeholder="923 456 789"
+                                class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500/50">
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Monto
+                                S/.</label>
+                            <input type="number" id="amount" placeholder="0.00"
+                                class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500/50">
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform active:scale-[0.98] mt-4 uppercase tracking-widest">
+                            Confirmar Envío
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="glass-card p-8 rounded-[2rem] flex flex-col h-[500px]">
+                    <h3 class="text-2xl font-bold tracking-tight mb-6">Audit Trail</h3>
+                    <div id="txHistory" class="space-y-4 overflow-y-auto flex-1 custom-scrollbar pr-2">
+                        <!-- Tx History loaded here -->
+                        <div class="text-center py-10 text-slate-500 italic">Cargando transacciones...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+        <div class="glass-card max-w-sm w-full p-8 rounded-[2rem] text-center border-green-500/30">
+            <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h4 class="text-2xl font-bold mb-2">Liquidación Exitosa</h4>
+            <p id="modalMsg" class="text-slate-400 text-sm mb-6">La operación ha sido procesada por Nexus Cloud.</p>
+            <div class="bg-slate-950/50 rounded-2xl p-4 mb-8">
+                <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Confirmación</p>
+                <p id="confirmCode" class="text-2xl font-mono text-white tracking-widest font-black">748921</p>
+            </div>
+            <button onclick="closeModal()"
+                class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all">
+                Cerrar Panel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://nexus-v2-liquidity.vercel.app/api';
+        let chart;
+
+        // Proteger ruta
+        if (!sessionStorage.getItem('auth_token')) {
+            window.location.href = '../LOGIN/LOGIN-SIMPLE.html';
+        }
+
+        document.getElementById('operatorDisplay').innerText = sessionStorage.getItem('operator_id') || 'NEXUS-ADMIN';
+
+        // Inicializar Dashboard
+        async function init() {
+            startUptime();
+            await updateMetrics();
+            await loadTransactions();
+            initChart();
+
+            // Polling cada 10 segundos
+            setInterval(async () => {
+                await updateMetrics();
+                await loadTransactions();
+            }, 10000);
+        }
+
+        function startUptime() {
+            const start = Date.now();
+            setInterval(() => {
+                const diff = Date.now() - start;
+                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        async function updateMetrics() {
+            try {
+                const res = await fetch(`${API_BASE}/nexus-transfer/status/system`);
+                const data = await res.json();
+
+                if (data.success) {
+                    const sys = data.system;
+                    document.getElementById('totalVolume').innerText = `S/. ${sys.transfers.totalVolume.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+                    document.getElementById('successRate').innerText = `${sys.core.successRate.toFixed(2)}%`;
+                    document.getElementById('txCount').innerText = sys.core.transactions;
+                    document.getElementById('totalFees').innerText = `S/. ${sys.transfers.totalFees.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+
+                    // Renderizar Pools
+                    const poolsHtml = sys.liquidity.pools.map(pool => `
+                        <div class="bg-slate-900/50 p-6 rounded-2xl border border-white/5">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-xs font-black text-slate-500 uppercase tracking-tighter">${pool.id}</span>
+                                <span class="text-[10px] font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded">Activo</span>
+                            </div>
+                            <p class="stat-value text-xl mb-2">S/. ${pool.balance.toLocaleString()}</p>
+                            <div class="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                                <div class="bg-blue-500 h-full" style="width: ${Math.min((pool.balance / 500000) * 100, 100)}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                    document.getElementById('poolsContainer').innerHTML = poolsHtml;
+                }
+            } catch (e) { console.error('Error fetching metrics', e); }
+        }
+
+        async function loadTransactions() {
+            try {
+                const res = await fetch(`${API_BASE}/transactions?limit=20`);
+                const data = await res.json();
+
+                if (data.success && data.transactions) {
+                    const txHtml = data.transactions.map(tx => `
+                        <div class="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center ${tx.destination === 'nexus' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-emerald-500/20 text-emerald-400'}">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${tx.destination === 'nexus' ? 'M19 14l-7 7m0 0l-7-7m7 7V3' : 'M5 10l7-7m0 0l7 7m-7-7v18'}" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight">${tx.destination.toUpperCase()}</p>
+                                    <p class="text-[10px] text-slate-500 font-mono">${tx.id.substring(0, 12)}...</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-white">S/. ${tx.amount.toFixed(2)}</p>
+                                <p class="text-[10px] text-slate-500">${new Date(tx.timestamp).toLocaleTimeString()}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                    document.getElementById('txHistory').innerHTML = txHtml || '<div class="text-center py-10 text-slate-500">No hay transacciones hoy</div>';
+                }
+            } catch (e) { console.error('Error loading tx', e); }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('liquidityChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Now'],
+                    datasets: [{
+                        label: 'Flujo S/.',
+                        data: [12000, 19000, 15000, 25000, 22000, 30000, 35000],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { display: false },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        async function rebalancePools() {
+            const btn = event.target;
+            btn.innerText = 'PROCESANDO...';
+            try {
+                const res = await fetch(`${API_BASE}/nexus-transfer/liquidity/rebalance`, { method: 'POST' });
+                if (res.ok) {
+                    await updateMetrics();
+                    alert('Pools rebalanceadas con éxito por el algoritmo NEXUS.');
+                }
+            } catch (e) { console.error(e); }
+            btn.innerText = 'REBALANCEAR';
+        }
+
+        // Manejar Transferencia
+        document.getElementById('transferForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const platform = document.getElementById('platform').value;
+            const dest = document.getElementById('destination').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (!dest || isNaN(amount)) return alert('Complete los datos');
+
+            btn.disabled = true;
+            btn.innerHTML = 'VALIDANDO...';
+
+            try {
+                const res = await fetch(`${API_BASE}/nexus-transfer/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ platform, destination: dest, amount })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('confirmCode').innerText = data.transaction.confirmationCode || 'SUCCESS';
+                    document.getElementById('modalMsg').innerText = `Se han enviado S/. ${amount} a la plataforma ${platform.toUpperCase()} (${dest}).`;
+                    document.getElementById('modal').style.display = 'flex';
+                    await updateMetrics();
+                    await loadTransactions();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) { alert('Error de conexión con el Nodo'); }
+
+            btn.disabled = false;
+            btn.innerHTML = 'CONFIRMAR ENVÍO';
+        });
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '../LOGIN/LOGIN-SIMPLE.html';
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
