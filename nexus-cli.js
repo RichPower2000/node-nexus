@@ -13,12 +13,20 @@ const { exec } = require('child_process');
 
 const API_URL = 'https://nexus-v2-liquidity.vercel.app/api';
 const VERSION = '5.6.0-YAPE-QR-V3.58.2';
-const AUDIT_DIR = path.join(os.homedir(), 'Desktop', 'NEXUS_AUDIT');
+
+// Directorio de Descargas de Windows
+const DOWNLOADS_DIR = path.join(os.homedir(), 'Downloads');
+const VOUCHERS_DIR = path.join(DOWNLOADS_DIR, 'VOUCHERS_NEXUS');
+const AUDIT_DIR = path.join(os.homedir(), 'Desktop', 'NEXUS_AUDIT'); // Mantener para compatibilidad
+
 const SECURE_TOKEN = 'NX-SUP-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-// Asegurar directorio de auditoría
+// Asegurar directorios
 if (!fs.existsSync(AUDIT_DIR)) {
     fs.mkdirSync(AUDIT_DIR, { recursive: true });
+}
+if (!fs.existsSync(VOUCHERS_DIR)) {
+    fs.mkdirSync(VOUCHERS_DIR, { recursive: true });
 }
 
 const BIBLE_VERSES = [
@@ -61,7 +69,8 @@ const colors = {
 async function showHeader() {
     console.clear();
     console.log(`${colors.white}${colors.bgCyan}${colors.bright} ⚡ NEXUS LIQUIDATE V5.6 - YAPE QR PUSH EDITION ${colors.reset}`);
-    console.log(`${colors.cyan} Status: ONLINE | Mode: QUANTUM DISBURSEMENT | 10 BILLION ${colors.reset}\n`);
+    console.log(`${colors.cyan} Status: ONLINE | Mode: QUANTUM DISBURSEMENT | 10 BILLION ${colors.reset}`);
+    console.log(`${colors.yellow} 📁 Vouchers: ${VOUCHERS_DIR}${colors.reset}\n`);
 }
 
 function question(query) {
@@ -392,15 +401,32 @@ function generateTicket(txn, plat, dest, amount) {
     </div>
 </body>
 </html>`;
-    const filename = `VOUCHER_${txn.id.substring(0, 8)}.html`;
-    const fullPath = path.join(AUDIT_DIR, filename);
-    fs.writeFileSync(fullPath, htmlTicket);
-    exec(`start "" "${fullPath}"`);
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+    const txnId = txn.id.substring(0, 8).toUpperCase();
+
+    // Nombre descriptivo: NEXUS_VOUCHER_YYYY-MM-DD_HH-MM-SS_PLATAFORMA_TXID.html
+    const filename = `NEXUS_VOUCHER_${dateStr}_${timeStr}_${plat.toUpperCase()}_${txnId}.html`;
+
+    // Guardar en carpeta de Descargas
+    const downloadsPath = path.join(VOUCHERS_DIR, filename);
+    fs.writeFileSync(downloadsPath, htmlTicket);
+
+    // También guardar en AUDIT_DIR para compatibilidad
+    const auditFilename = `VOUCHER_${txnId}.html`;
+    const auditPath = path.join(AUDIT_DIR, auditFilename);
+    fs.writeFileSync(auditPath, htmlTicket);
+
+    // Abrir el voucher de Descargas
+    exec(`start "" "${downloadsPath}"`);
+
+    console.log(`${colors.green}✅ Voucher guardado en: ${downloadsPath}${colors.reset}`);
 
     // Also save voucher data to history folder
     saveVoucherToHistory(txn, plat, dest, amount);
 
-    return fullPath;
+    return downloadsPath;
 }
 
 // Function to save voucher data to history folder
@@ -543,13 +569,24 @@ async function executeReceive() {
         </div>
     </body></html>`;
 
-    fs.writeFileSync(path.join(AUDIT_DIR, `RECARGA_${code}.html`), htmlReceive);
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+
+    // Nombre descriptivo para recarga
+    const filename = `NEXUS_RECARGA_${dateStr}_${timeStr}_${code}.html`;
+    const downloadsPath = path.join(VOUCHERS_DIR, filename);
+    const auditPath = path.join(AUDIT_DIR, `RECARGA_${code}.html`);
+
+    // Guardar en ambas ubicaciones
+    fs.writeFileSync(downloadsPath, htmlReceive);
+    fs.writeFileSync(auditPath, htmlReceive);
 
     // Save receive voucher to history
     saveReceiveVoucherToHistory(code, amount);
 
-    exec(`start "" "${path.join(AUDIT_DIR, `RECARGA_${code}.html`)}"`);
-    console.log(`\n${colors.green}✅ Orden de recarga abierta.${colors.reset}`);
+    exec(`start "" "${downloadsPath}"`);
+    console.log(`\n${colors.green}✅ Orden de recarga guardada en: ${downloadsPath}${colors.reset}`);
     await question('\n[ENTER]...');
     mainMenu();
 }
@@ -578,8 +615,16 @@ async function executeQRTransaction() {
             <p style="color:#666">REF: ${destCode}</p>
         </body></html>`;
 
-        fs.writeFileSync(path.join(AUDIT_DIR, `QUICK_COLLECT_${destCode}.html`), htmlQR);
-        exec(`start "" "${path.join(AUDIT_DIR, `QUICK_COLLECT_${destCode}.html`)}"`);
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+        const filename = `NEXUS_QR_COBRO_${dateStr}_${timeStr}_${destCode}.html`;
+        const downloadsPath = path.join(VOUCHERS_DIR, filename);
+        const auditPath = path.join(AUDIT_DIR, `QUICK_COLLECT_${destCode}.html`);
+
+        fs.writeFileSync(downloadsPath, htmlQR);
+        fs.writeFileSync(auditPath, htmlQR);
+        exec(`start "" "${downloadsPath}"`);
         console.log(`\n${colors.green}✅ Terminal de Cobro QR abierta.${colors.reset}`);
     }
     else if (qrSel === '2') {
@@ -643,10 +688,16 @@ async function executeQRTransaction() {
 </body>
 </html>`;
 
-        const pushFilename = `YAPE_PUSH_${pushCode}.html`;
-        const fullPath = path.join(AUDIT_DIR, pushFilename);
-        fs.writeFileSync(fullPath, htmlPush);
-        exec(`start "" "${fullPath}"`);
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+        const filename = `NEXUS_YAPE_ENVIO_${dateStr}_${timeStr}_${pushCode}.html`;
+        const downloadsPath = path.join(VOUCHERS_DIR, filename);
+        const auditPath = path.join(AUDIT_DIR, `YAPE_PUSH_${pushCode}.html`);
+
+        fs.writeFileSync(downloadsPath, htmlPush);
+        fs.writeFileSync(auditPath, htmlPush);
+        exec(`start "" "${downloadsPath}"`);
 
         console.log(`\n${colors.green}✅ DISPENSADOR YAPE GENERADO CON ÉXITO${colors.reset}`);
         console.log(`- El receptor debe escanear el QR en tu pantalla.`);
