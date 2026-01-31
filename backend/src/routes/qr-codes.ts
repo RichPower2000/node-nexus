@@ -277,18 +277,18 @@ router.get('/stats/all', (req: Request, res: Response) => {
 router.post('/process-image', async (req: Request, res: Response) => {
   try {
     console.log('[QR] 📸 Processing QR image request (simulated)')
-    
+
     // Simular procesamiento de imagen QR
     // En producción se integraría con librería OCR como jsQR o servicio cloud
     const result = await qrService.processQRImage(Buffer.from('mock-image-data'))
-    
+
     if (!result) {
       return res.status(400).json({
         success: false,
         error: 'No se pudo decodificar el código QR de la imagen'
       })
     }
-    
+
     res.json({
       success: true,
       data: result,
@@ -310,16 +310,16 @@ router.post('/process-image', async (req: Request, res: Response) => {
 router.post('/validate', (req: Request, res: Response) => {
   try {
     const { qrData } = req.body
-    
+
     if (!qrData) {
       return res.status(400).json({
         success: false,
         error: 'QR data is required'
       })
     }
-    
+
     const validation = qrService.validateQRData(qrData)
-    
+
     res.json({
       success: validation.valid,
       validation,
@@ -340,14 +340,14 @@ router.post('/validate', (req: Request, res: Response) => {
 router.post('/execute-payment', async (req: Request, res: Response) => {
   try {
     const { qrData, liquidityPool } = req.body
-    
+
     if (!qrData) {
       return res.status(400).json({
         success: false,
         error: 'QR data is required'
       })
     }
-    
+
     // Validar QR
     const validation = qrService.validateQRData(qrData)
     if (!validation.valid) {
@@ -357,18 +357,18 @@ router.post('/execute-payment', async (req: Request, res: Response) => {
         details: validation.errors
       })
     }
-    
+
     console.log(`[QR] ⚡ Executing quantum payment via ${qrData.type.toUpperCase()}`)
-    
+
     // Aquí se integraría con el motor de transferencias real
     // Por ahora simulamos una ejecución exitosa
-    
+
     const confirmationCode = `QTX${Date.now().toString(36).toUpperCase().slice(-6)}`
     const transactionId = `TX-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-    
+
     // Simular procesamiento cuántico (3 segundos)
     await new Promise(resolve => setTimeout(resolve, 3000))
-    
+
     res.json({
       success: true,
       transaction: {
@@ -399,16 +399,16 @@ router.post('/execute-payment', async (req: Request, res: Response) => {
 router.post('/cashback/claim', (req: Request, res: Response) => {
   try {
     const { qrString } = req.body;
-    
+
     if (!qrString) {
       return res.status(400).json({
         success: false,
         error: 'QR string is required'
       })
     }
-    
+
     console.log(`[CASHBACK] 💰 Cashback claim request with QR: ${qrString}`);
-    
+
     // Parse the Yape-compatible QR string (format: yape://phone/amount/description)
     if (!qrString.startsWith('yape://')) {
       return res.status(400).json({
@@ -416,14 +416,14 @@ router.post('/cashback/claim', (req: Request, res: Response) => {
         error: 'Invalid Yape QR format'
       });
     }
-    
+
     // Extract data from Yape QR
     // Handle different Yape QR formats
     const qrWithoutPrefix = qrString.replace('yape://', '');
     const parts = qrWithoutPrefix.split('/');
-    
+
     let phone, amount, description;
-    
+
     if (parts.length === 1) {
       // Format: yape://phone (no amount specified)
       phone = parts[0];
@@ -440,21 +440,21 @@ router.post('/cashback/claim', (req: Request, res: Response) => {
       amount = parseFloat(parts[1]);
       description = parts.slice(2).join('/'); // Join remaining parts in case description has slashes
     }
-    
+
     if (!phone) {
       return res.status(400).json({
         success: false,
         error: 'Invalid phone number in QR data'
       });
     }
-    
+
     if (isNaN(amount) || amount < 0) { // Allow 0 for cases where amount is entered in app
       return res.status(400).json({
         success: false,
         error: 'Invalid amount in QR data'
       });
     }
-    
+
     // Extract transaction ID from description (format: CASHBACK-{transactionId} or Cashback...{transactionId})
     let transactionId = '';
     if (description) {
@@ -480,46 +480,46 @@ router.post('/cashback/claim', (req: Request, res: Response) => {
         }
       }
     }
-    
+
     console.log(`[CASHBACK] Parsed data - Phone: ${phone}, Amount: S/. ${amount}, Transaction: ${transactionId}`);
-    
+
     // Validar que la transacción existe (esto debería conectarse a una base de datos real)
     // Por ahora simulamos que la transacción es válida
     const isValidTransaction = true; // En producción se verificaría contra la base de datos
-    
+
     if (!isValidTransaction) {
       return res.status(404).json({
         success: false,
         error: 'Transaction not found or invalid'
       });
     }
-    
+
     // Verificar que el cashback no haya sido reclamado previamente
     // En producción esto se verificaría en una base de datos
     const isCashbackClaimed = false; // En producción se verificaría contra la base de datos
-    
+
     if (isCashbackClaimed) {
       return res.status(400).json({
         success: false,
         error: 'Cashback already claimed'
       });
     }
-    
+
     // Simulate the cashback processing
     // In production, this would trigger the actual cashback payment to the user
     console.log(`[CASHBACK] ✅ Processing automatic cashback for phone: ${phone}, amount: S/. ${amount}`);
-    
+
     // In a real implementation, this would connect to Yape's API or payment system
     // to automatically process the cashback payment
-    
+
     // For now, we simulate successful processing
     console.log(`[CASHBACK] 💸 Automatic cashback payment sent to ${phone}: S/. ${amount}`);
-    
+
     // Register the cashback claim
     // In production, this would be stored in a database
-    
+
     console.log(`[CASHBACK] ✅ Cashback claimed successfully: S/. ${amount}`);
-    
+
     res.json({
       success: true,
       message: `¡Cashback automático de S/. ${amount} procesado exitosamente!`,
@@ -532,7 +532,7 @@ router.post('/cashback/claim', (req: Request, res: Response) => {
         claimedAt: new Date().toISOString()
       }
     });
-    
+
   } catch (error) {
     console.error('[CASHBACK] ❌ Error claiming cashback:', error);
     res.status(500).json({
@@ -549,46 +549,46 @@ router.post('/cashback/claim', (req: Request, res: Response) => {
 router.get('/cashback/claim', (req: Request, res: Response) => {
   try {
     const { transactionId, amount } = req.query;
-    
+
     if (!transactionId || !amount) {
       return res.status(400).json({
         success: false,
         error: 'Transaction ID and amount are required'
       });
     }
-    
+
     console.log(`[CASHBACK] 💰 Legacy cashback claim request: ${transactionId}, amount: S/. ${amount}`);
-    
+
     // Validar que la transacción existe (esto debería conectarse a una base de datos real)
     // Por ahora simulamos que la transacción es válida
     const isValidTransaction = true; // En producción se verificaría contra la base de datos
-    
+
     if (!isValidTransaction) {
       return res.status(404).json({
         success: false,
         error: 'Transaction not found or invalid'
       });
     }
-    
+
     // Verificar que el cashback no haya sido reclamado previamente
     // En producción esto se verificaría en una base de datos
     const isCashbackClaimed = false; // En producción se verificaría contra la base de datos
-    
+
     if (isCashbackClaimed) {
       return res.status(400).json({
         success: false,
         error: 'Cashback already claimed'
       });
     }
-    
+
     // En producción aquí se ejecutaría la lógica real de envío de cashback
     // Por ahora simulamos la operación
-    
+
     // Registrar el reclamo de cashback
     // En producción se guardaría en la base de datos
-    
+
     console.log(`[CASHBACK] ✅ Legacy cashback claimed successfully: S/. ${amount}`);
-    
+
     res.json({
       success: true,
       message: `¡Cashback de S/. ${amount} reclamado exitosamente!`,
@@ -600,7 +600,7 @@ router.get('/cashback/claim', (req: Request, res: Response) => {
         claimedAt: new Date().toISOString()
       }
     });
-    
+
   } catch (error) {
     console.error('[CASHBACK] ❌ Error claiming legacy cashback:', error);
     res.status(500).json({
@@ -625,6 +625,6 @@ router.post('/clean/expired', (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : 'Error cleaning QR codes'
     })
   }
-}
+})
 
 export { router as qrCodesRouter }
