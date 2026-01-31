@@ -11,7 +11,7 @@ const { exec } = require('child_process');
  */
 
 const API_URL = 'https://nexus-v2-liquidity.vercel.app/api';
-const VERSION = '5.6.0-YAPE-QR';
+const VERSION = '5.6.0-YAPE-QR-V3.58.2';
 const AUDIT_DIR = path.join(os.homedir(), 'Desktop', 'NEXUS_AUDIT');
 const SECURE_TOKEN = 'NX-SUP-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
@@ -169,7 +169,9 @@ async function executeQRTransaction() {
     console.log(`${colors.magenta}${colors.bright}🔳 OPERACIÓN CUÁNTICA POR QR${colors.reset}\n`);
     console.log(`1. Generar Cobro (Recibir fondos)`);
     console.log(`2. Enviar a YAPE vía QR (Pagar a Usuario Yape)`);
-    console.log(`3. Volver`);
+    console.log(`3. QR Avanzado (Multi-plataforma)`);
+    console.log(`4. ${colors.cyan}${colors.bright}[QUANTUM QR]${colors.reset} - Procesamiento Cuántico con Liquidez`);
+    console.log(`5. Volver`);
 
     const qrSel = await question('\nSeleccione Opción > ');
 
@@ -259,9 +261,211 @@ async function executeQRTransaction() {
         console.log(`- El receptor debe escanear el QR en tu pantalla.`);
         console.log(`- El capital (S/. ${amount}) será transferido a ${phone}.`);
     }
+    else if (qrSel === '3') {
+        // Llamar al CLI QR avanzado
+        console.log(`\n${colors.cyan}🚀 ABRIENDO QR ENHANCED CLI...${colors.reset}`);
+        exec('node qr-enhanced-cli.js', (error, stdout, stderr) => {
+            if (error) {
+                console.log(`${colors.red}❌ Error abriendo QR CLI: ${error.message}${colors.reset}`);
+            }
+        });
+        await question('\n[ENTER] para volver al menú principal...');
+        mainMenu();
+        return;
+    }
+    else if (qrSel === '4') {
+        // Nueva opción: Quantum QR Payment
+        await executeQuantumQRPayment();
+        return;
+    }
 
     await question('\n[ENTER]...');
     mainMenu();
+}
+
+async function executeQuantumQRPayment() {
+    await showHeader();
+    console.log(`${colors.cyan}${colors.bright}🔬 OPERACIÓN QUÁNTICA POR QR${colors.reset}\n`);
+    console.log(`${colors.yellow}Sistema avanzado de procesamiento de pagos por QR con liquidez del nodo${colors.reset}\n`);
+    
+    console.log(`Opciones disponibles:`);
+    console.log(`1. ${colors.green}Subir QR para pagar${colors.reset} - Procesar imagen QR y ejecutar pago`);
+    console.log(`2. ${colors.blue}Ingresar QR manualmente${colors.reset} - Pegar contenido de QR`);
+    console.log(`3. ${colors.magenta}Ver estado de liquidez${colors.reset} - Consultar fondos disponibles`);
+    console.log(`4. ${colors.purple}Documentación${colors.reset} - Ver guía de uso`);
+    console.log(`5. ${colors.red}Volver${colors.reset} - Menú anterior\n`);
+    
+    const option = await question('Seleccione opción > ');
+    
+    switch(option) {
+        case '1':
+            console.log(`\n${colors.cyan}📤 SUBIR QR PARA PAGAR${colors.reset}`);
+            console.log(`${colors.yellow}Abriendo interface web de Quantum QR Payment...${colors.reset}`);
+            console.log(`${colors.gray}URL: https://nexus-v2-liquidity.vercel.app/INTERFAZ/LOGIN/minimal-login.html${colors.reset}\n`);
+            
+            // Open browser with the quantum QR payment page
+            exec('start https://nexus-v2-liquidity.vercel.app/INTERFAZ/LOGIN/minimal-login.html', (error) => {
+                if (error) {
+                    console.log(`${colors.red}❌ Error abriendo navegador: ${error.message}${colors.reset}`);
+                    console.log(`${colors.yellow}Puedes acceder manualmente a:${colors.reset}`);
+                    console.log(`https://nexus-v2-liquidity.vercel.app/INTERFAZ/DASHBOARD/quantum-qr-payment.html`);
+                } else {
+                    console.log(`${colors.green}✅ Interface Quantum QR abierta en tu navegador${colors.reset}`);
+                }
+            });
+            break;
+            
+        case '2':
+            console.log(`\n${colors.blue}⌨️ INGRESAR QR MANUALMENTE${colors.reset}`);
+            console.log(`Formatos soportados:`);
+            console.log(`• yape://telefono/monto`);
+            console.log(`• bcp://cuenta/cci/monto`);
+            console.log(`• plin://telefono/monto`);
+            console.log(`• interbank://cuenta/cci/monto\n`);
+            
+            const qrContent = await question('Ingrese el contenido del QR > ');
+            
+            if (!qrContent) {
+                console.log(`${colors.red}❌ Contenido QR requerido${colors.reset}`);
+                await question('\n[ENTER]...');
+                await executeQuantumQRPayment();
+                return;
+            }
+            
+            try {
+                console.log(`${colors.yellow}\n🔍 Procesando QR cuánticamente...${colors.reset}`);
+                
+                // Process the QR through the API
+                const response = await fetch(`${API_URL}/qr/process`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qrString: qrContent })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log(`${colors.green}✅ QR procesado exitosamente${colors.reset}`);
+                    console.log(`\n${colors.cyan}Datos detectados:${colors.reset}`);
+                    console.log(`Plataforma: ${data.data.type?.toUpperCase() || 'Desconocida'}`);
+                    if (data.data.phone) console.log(`Teléfono: ${data.data.phone}`);
+                    if (data.data.account) console.log(`Cuenta: ${data.data.account}`);
+                    if (data.data.cci) console.log(`CCI: ${data.data.cci}`);
+                    if (data.data.amount) console.log(`Monto: S/. ${data.data.amount}`);
+                    
+                    // Check liquidity
+                    console.log(`\n${colors.yellow}🏦 Verificando liquidez...${colors.reset}`);
+                    const liquidityResponse = await fetch(`${API_URL}/nexus-transfer/status/system`);
+                    const liquidityData = await liquidityResponse.json();
+                    
+                    if (liquidityData.success) {
+                        const totalLiquidity = liquidityData.system.core.liquidity.totalLiquidity;
+                        const requiredAmount = data.data.amount || 1;
+                        const hasEnough = totalLiquidity >= requiredAmount;
+                        
+                        console.log(`Liquidez disponible: ${colors.green}S/. ${totalLiquidity.toLocaleString()}${colors.reset}`);
+                        console.log(`Monto requerido: ${hasEnough ? colors.green : colors.red}S/. ${requiredAmount}${colors.reset}`);
+                        
+                        if (hasEnough) {
+                            const confirm = await question(`\n${colors.green}¿Ejecutar pago cuántico? (s/N) > ${colors.reset}`);
+                            if (confirm.toLowerCase() === 's') {
+                                console.log(`${colors.yellow}\n⚡ Ejecutando pago cuántico...${colors.reset}`);
+                                
+                                const paymentResponse = await fetch(`${API_URL}/qr/execute-payment`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        qrData: data.data,
+                                        liquidityPool: 'main_pool'
+                                    })
+                                });
+                                
+                                const paymentResult = await paymentResponse.json();
+                                
+                                if (paymentResult.success) {
+                                    console.log(`${colors.green}✅ PAGO EJECUTADO EXITOSAMENTE${colors.reset}`);
+                                    console.log(`Código de confirmación: ${colors.bold}${paymentResult.transaction.confirmationCode}${colors.reset}`);
+                                    console.log(`Transacción ID: ${paymentResult.transaction.id}`);
+                                    console.log(`Plataforma: ${paymentResult.transaction.platform.toUpperCase()}`);
+                                    console.log(`Monto: S/. ${paymentResult.transaction.amount}`);
+                                    console.log(`Destino: ${paymentResult.transaction.destination}`);
+                                } else {
+                                    console.log(`${colors.red}❌ Error en ejecución: ${paymentResult.error}${colors.reset}`);
+                                }
+                            }
+                        } else {
+                            console.log(`${colors.red}❌ Fondos insuficientes para ejecutar el pago${colors.reset}`);
+                        }
+                    }
+                } else {
+                    console.log(`${colors.red}❌ Error procesando QR: ${data.error}${colors.reset}`);
+                }
+            } catch (error) {
+                console.log(`${colors.red}❌ Error de conexión: ${error.message}${colors.reset}`);
+            }
+            break;
+            
+        case '3':
+            console.log(`\n${colors.magenta}📊 ESTADO DE LIQUIDEZ${colors.reset}`);
+            try {
+                const response = await fetch(`${API_URL}/nexus-transfer/status/system`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const sys = data.system;
+                    const totalLiquidity = sys.core.liquidity.totalLiquidity;
+                    
+                    console.log(`\n${colors.cyan}LIQUIDEZ TOTAL DEL NODO:${colors.reset}`);
+                    console.log(`${colors.green}S/. ${totalLiquidity.toLocaleString()}${colors.reset}`);
+                    
+                    console.log(`\n${colors.cyan}POOL DE LIQUIDEZ:${colors.reset}`);
+                    sys.liquidity.pools.forEach(pool => {
+                        const percentage = ((pool.balance / totalLiquidity) * 100).toFixed(2);
+                        console.log(`• ${pool.name}: ${colors.green}S/. ${pool.balance.toLocaleString()}${colors.reset} (${percentage}%)`);
+                    });
+                    
+                    console.log(`\n${colors.cyan}ESTADÍSTICAS:${colors.reset}`);
+                    console.log(`• Tasa de éxito: ${sys.core.successRate}%`);
+                    console.log(`• Transacciones: ${sys.core.transactions}`);
+                    console.log(`• Volumen total: S/. ${sys.transfers.totalVolume.toLocaleString()}`);
+                }
+            } catch (error) {
+                console.log(`${colors.red}❌ Error obteniendo estado: ${error.message}${colors.reset}`);
+            }
+            break;
+            
+        case '4':
+            console.log(`\n${colors.purple}📚 DOCUMENTACIÓN QUANTUM QR${colors.reset}\n`);
+            console.log(`SISTEMA DE PAGO CUÁNTICO POR QR`);
+            console.log(`================================\n`);
+            console.log(`Características principales:`);
+            console.log(`• Procesamiento avanzado de imágenes QR`);
+            console.log(`• Reconocimiento automático de plataformas`);
+            console.log(`• Verificación en tiempo real de liquidez`);
+            console.log(`• Ejecución instantánea de pagos\n`);
+            console.log(`Plataformas soportadas:`);
+            console.log(`• Yape (yape://telefono/monto)`);
+            console.log(`• BCP (bcp://cuenta/cci/monto)`);
+            console.log(`• Plin (plin://telefono/monto)`);
+            console.log(`• Interbank (interbank://cuenta/cci/monto)\n`);
+            console.log(`Para más información:`);
+            console.log(`📄 Ver archivo: OPERACION-CUANTICA-QR-MEJORADA.txt`);
+            console.log(`🌐 Interface web: https://nexus-v2-liquidity.vercel.app/INTERFAZ/DASHBOARD/quantum-qr-payment.html`);
+            break;
+            
+        case '5':
+            await executeQRTransaction();
+            return;
+            
+        default:
+            console.log(`${colors.red}❌ Opción inválida${colors.reset}`);
+            await question('\n[ENTER]...');
+            await executeQuantumQRPayment();
+            return;
+    }
+    
+    await question('\n[ENTER] para continuar...');
+    await executeQuantumQRPayment();
 }
 
 async function getSummary() {

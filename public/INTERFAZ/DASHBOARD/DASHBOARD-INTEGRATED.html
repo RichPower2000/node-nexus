@@ -341,7 +341,7 @@
 
         // Proteger ruta
         if (!sessionStorage.getItem('auth_token')) {
-            window.location.href = '../LOGIN/quantum-login.html';
+            window.location.href = '../LOGIN/minimal-login.html';
         }
 
         document.getElementById('operatorDisplay').innerText = sessionStorage.getItem('operator_id') || 'NEXUS-ADMIN';
@@ -515,7 +515,7 @@
 
         function logout() {
             sessionStorage.clear();
-            window.location.href = '../LOGIN/quantum-login.html';
+            window.location.href = '../LOGIN/minimal-login.html';
         }
 
         init();
