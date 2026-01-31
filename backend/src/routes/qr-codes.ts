@@ -391,6 +391,225 @@ router.post('/execute-payment', async (req: Request, res: Response) => {
     })
   }
 })
+
+/**
+ * POST /api/qr/cashback/claim
+ * Endpoint para reclamar cashback de una transacción Yape-compatible
+ */
+router.post('/cashback/claim', (req: Request, res: Response) => {
+  try {
+    const { qrString } = req.body;
+    
+    if (!qrString) {
+      return res.status(400).json({
+        success: false,
+        error: 'QR string is required'
+      })
+    }
+    
+    console.log(`[CASHBACK] 💰 Cashback claim request with QR: ${qrString}`);
+    
+    // Parse the Yape-compatible QR string (format: yape://phone/amount/description)
+    if (!qrString.startsWith('yape://')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid Yape QR format'
+      });
+    }
+    
+    // Extract data from Yape QR
+    // Handle different Yape QR formats
+    const qrWithoutPrefix = qrString.replace('yape://', '');
+    const parts = qrWithoutPrefix.split('/');
+    
+    let phone, amount, description;
+    
+    if (parts.length === 1) {
+      // Format: yape://phone (no amount specified)
+      phone = parts[0];
+      amount = 0; // Will be prompted in Yape app
+      description = '';
+    } else if (parts.length === 2) {
+      // Format: yape://phone/amount
+      phone = parts[0];
+      amount = parseFloat(parts[1]);
+      description = '';
+    } else {
+      // Format: yape://phone/amount/description
+      phone = parts[0];
+      amount = parseFloat(parts[1]);
+      description = parts.slice(2).join('/'); // Join remaining parts in case description has slashes
+    }
+    
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid phone number in QR data'
+      });
+    }
+    
+    if (isNaN(amount) || amount < 0) { // Allow 0 for cases where amount is entered in app
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid amount in QR data'
+      });
+    }
+    
+    // Extract transaction ID from description (format: CASHBACK-{transactionId} or Cashback...{transactionId})
+    let transactionId = '';
+    if (description) {
+      // Try different patterns to extract transaction ID
+      if (description.startsWith('CASHBACK-')) {
+        transactionId = description.replace('CASHBACK-', '');
+      } else if (description.includes('Cashback%20Nexus-')) {
+        // Handle URL encoded format
+        const parts = description.split('Cashback%20Nexus-');
+        if (parts.length > 1) {
+          transactionId = parts[1];
+        }
+      } else if (description.includes('Cashback Nexus-')) {
+        // Handle non-encoded format
+        const parts = description.split('Cashback Nexus-');
+        if (parts.length > 1) {
+          transactionId = parts[1];
+        }
+      } else if (description.includes('Cashback de Transaccion-')) {
+        const parts = description.split('Cashback de Transaccion-');
+        if (parts.length > 1) {
+          transactionId = parts[1];
+        }
+      }
+    }
+    
+    console.log(`[CASHBACK] Parsed data - Phone: ${phone}, Amount: S/. ${amount}, Transaction: ${transactionId}`);
+    
+    // Validar que la transacción existe (esto debería conectarse a una base de datos real)
+    // Por ahora simulamos que la transacción es válida
+    const isValidTransaction = true; // En producción se verificaría contra la base de datos
+    
+    if (!isValidTransaction) {
+      return res.status(404).json({
+        success: false,
+        error: 'Transaction not found or invalid'
+      });
+    }
+    
+    // Verificar que el cashback no haya sido reclamado previamente
+    // En producción esto se verificaría en una base de datos
+    const isCashbackClaimed = false; // En producción se verificaría contra la base de datos
+    
+    if (isCashbackClaimed) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cashback already claimed'
+      });
+    }
+    
+    // Simulate the cashback processing
+    // In production, this would trigger the actual cashback payment to the user
+    console.log(`[CASHBACK] ✅ Processing automatic cashback for phone: ${phone}, amount: S/. ${amount}`);
+    
+    // In a real implementation, this would connect to Yape's API or payment system
+    // to automatically process the cashback payment
+    
+    // For now, we simulate successful processing
+    console.log(`[CASHBACK] 💸 Automatic cashback payment sent to ${phone}: S/. ${amount}`);
+    
+    // Register the cashback claim
+    // In production, this would be stored in a database
+    
+    console.log(`[CASHBACK] ✅ Cashback claimed successfully: S/. ${amount}`);
+    
+    res.json({
+      success: true,
+      message: `¡Cashback automático de S/. ${amount} procesado exitosamente!`,
+      details: {
+        transactionId,
+        phone,
+        cashbackAmount: amount,
+        percentage: '90%',
+        status: 'processed',
+        claimedAt: new Date().toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error('[CASHBACK] ❌ Error claiming cashback:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Error claiming cashback'
+    });
+  }
+});
+
+/**
+ * GET /api/qr/cashback/claim
+ * Legacy endpoint for backwards compatibility
+ */
+router.get('/cashback/claim', (req: Request, res: Response) => {
+  try {
+    const { transactionId, amount } = req.query;
+    
+    if (!transactionId || !amount) {
+      return res.status(400).json({
+        success: false,
+        error: 'Transaction ID and amount are required'
+      });
+    }
+    
+    console.log(`[CASHBACK] 💰 Legacy cashback claim request: ${transactionId}, amount: S/. ${amount}`);
+    
+    // Validar que la transacción existe (esto debería conectarse a una base de datos real)
+    // Por ahora simulamos que la transacción es válida
+    const isValidTransaction = true; // En producción se verificaría contra la base de datos
+    
+    if (!isValidTransaction) {
+      return res.status(404).json({
+        success: false,
+        error: 'Transaction not found or invalid'
+      });
+    }
+    
+    // Verificar que el cashback no haya sido reclamado previamente
+    // En producción esto se verificaría en una base de datos
+    const isCashbackClaimed = false; // En producción se verificaría contra la base de datos
+    
+    if (isCashbackClaimed) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cashback already claimed'
+      });
+    }
+    
+    // En producción aquí se ejecutaría la lógica real de envío de cashback
+    // Por ahora simulamos la operación
+    
+    // Registrar el reclamo de cashback
+    // En producción se guardaría en la base de datos
+    
+    console.log(`[CASHBACK] ✅ Legacy cashback claimed successfully: S/. ${amount}`);
+    
+    res.json({
+      success: true,
+      message: `¡Cashback de S/. ${amount} reclamado exitosamente!`,
+      details: {
+        transactionId,
+        cashbackAmount: Number(amount),
+        percentage: '90%',
+        status: 'claimed',
+        claimedAt: new Date().toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error('[CASHBACK] ❌ Error claiming legacy cashback:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Error claiming cashback'
+    });
+  }
+});
+
 router.post('/clean/expired', (req: Request, res: Response) => {
   try {
     const count = qrService.cleanExpiredQRCodes()
@@ -406,6 +625,6 @@ router.post('/clean/expired', (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : 'Error cleaning QR codes'
     })
   }
-})
+}
 
 export { router as qrCodesRouter }

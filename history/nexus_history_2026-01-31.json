@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-01-31T20:36:43.915Z",
+  "transactions": [
+    {
+      "id": "TXN-1769891777686-jwarw7",
+      "type": "transfer",
+      "source": "nexus",
+      "destination": "yape",
+      "amount": 5000,
+      "currency": "PEN",
+      "status": "completed",
+      "timestamp": 1769891781800,
+      "latency": 4113.551059999998,
+      "hash": "000048ECAE16",
+      "realTransfer": true,
+      "recipientPhone": "975589800",
+      "confirmationCode": "VAL-L0Z3OM",
+      "liquidityOptimized": false,
+      "liquidityScore": 85,
+      "fee": 25,
+      "netAmount": 4975
+    }
+  ]
+}
