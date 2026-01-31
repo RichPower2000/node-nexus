@@ -166,11 +166,12 @@ async function executeReceive() {
 
 async function executeQRTransaction() {
     await showHeader();
-    console.log(`${colors.magenta}${colors.bright}🔳 OPERACIÓN CUÁNTICA POR QR${colors.reset}\n`);
+    console.log(`${colors.magenta}${colors.bright}🔳 OPERACIÓN CUÁNTICA POR QR - TERMINAL${colors.reset}\n`);
+    console.log(`${colors.yellow}Sistema operativo exclusivamente por comandos${colors.reset}\n`);
     console.log(`1. Generar Cobro (Recibir fondos)`);
     console.log(`2. Enviar a YAPE vía QR (Pagar a Usuario Yape)`);
     console.log(`3. QR Avanzado (Multi-plataforma)`);
-    console.log(`4. ${colors.cyan}${colors.bright}[QUANTUM QR]${colors.reset} - Procesamiento Cuántico con Liquidez`);
+    console.log(`4. ${colors.cyan}${colors.bright}[QUANTUM QR]${colors.reset} - Procesamiento Cuántico (Terminal)`);
     console.log(`5. Volver`);
 
     const qrSel = await question('\nSeleccione Opción > ');
@@ -285,11 +286,12 @@ async function executeQRTransaction() {
 
 async function executeQuantumQRPayment() {
     await showHeader();
-    console.log(`${colors.cyan}${colors.bright}🔬 OPERACIÓN QUÁNTICA POR QR${colors.reset}\n`);
-    console.log(`${colors.yellow}Sistema avanzado de procesamiento de pagos por QR con liquidez del nodo${colors.reset}\n`);
+    console.log(`${colors.cyan}${colors.bright}🔬 OPERACIÓN QUÁNTICA POR QR - MODO TERMINAL${colors.reset}\n`);
+    console.log(`${colors.yellow}Sistema avanzado de procesamiento de pagos por QR${colors.reset}`);
+    console.log(`${colors.yellow}Operación exclusiva por comandos de terminal${colors.reset}\n`);
     
     console.log(`Opciones disponibles:`);
-    console.log(`1. ${colors.green}Subir QR para pagar${colors.reset} - Procesar imagen QR y ejecutar pago`);
+    console.log(`1. ${colors.green}Procesamiento por terminal${colors.reset} - Eliminada interfaz web`);
     console.log(`2. ${colors.blue}Ingresar QR manualmente${colors.reset} - Pegar contenido de QR`);
     console.log(`3. ${colors.magenta}Ver estado de liquidez${colors.reset} - Consultar fondos disponibles`);
     console.log(`4. ${colors.purple}Documentación${colors.reset} - Ver guía de uso`);
@@ -300,19 +302,8 @@ async function executeQuantumQRPayment() {
     switch(option) {
         case '1':
             console.log(`\n${colors.cyan}📤 SUBIR QR PARA PAGAR${colors.reset}`);
-            console.log(`${colors.yellow}Abriendo interface web de Quantum QR Payment...${colors.reset}`);
-            console.log(`${colors.gray}URL: https://nexus-v2-liquidity.vercel.app/INTERFAZ/LOGIN/minimal-login.html${colors.reset}\n`);
-            
-            // Open browser with the quantum QR payment page
-            exec('start https://nexus-v2-liquidity.vercel.app/INTERFAZ/LOGIN/minimal-login.html', (error) => {
-                if (error) {
-                    console.log(`${colors.red}❌ Error abriendo navegador: ${error.message}${colors.reset}`);
-                    console.log(`${colors.yellow}Puedes acceder manualmente a:${colors.reset}`);
-                    console.log(`https://nexus-v2-liquidity.vercel.app/INTERFAZ/DASHBOARD/quantum-qr-payment.html`);
-                } else {
-                    console.log(`${colors.green}✅ Interface Quantum QR abierta en tu navegador${colors.reset}`);
-                }
-            });
+            console.log(`${colors.yellow}Funcionalidad eliminada. El nodo opera solo por terminal.${colors.reset}\n`);
+            console.log(`${colors.gray}Usa la opción 2 para procesamiento directo por comandos${colors.reset}\n`);
             break;
             
         case '2':
@@ -450,7 +441,7 @@ async function executeQuantumQRPayment() {
             console.log(`• Interbank (interbank://cuenta/cci/monto)\n`);
             console.log(`Para más información:`);
             console.log(`📄 Ver archivo: OPERACION-CUANTICA-QR-MEJORADA.txt`);
-            console.log(`🌐 Interface web: https://nexus-v2-liquidity.vercel.app/INTERFAZ/DASHBOARD/quantum-qr-payment.html`);
+            console.log(`💻 Sistema operativo solo por terminal`);
             break;
             
         case '5':
@@ -484,10 +475,13 @@ async function getSummary() {
 async function mainMenu() {
     await showHeader();
     await getSummary();
-
+    
+    console.log(`${colors.green}${colors.bright}[ NODO QUÁNTICO - MODO TERMINAL ]${colors.reset}\n`);
+    console.log(`Sistema operativo exclusivamente por comandos de terminal\n`);
+    
     console.log(`1. ${colors.green}${colors.bright}[ ENVIAR ]${colors.reset}  - Nueva Liquidación`);
     console.log(`2. ${colors.blue}${colors.bright}[ RECIBIR ]${colors.reset} - Nueva Recepción/Carga`);
-    console.log(`3. ${colors.magenta}${colors.bright}[ QR SCAN ]${colors.reset} - Operación por QR (YAPE PUSH)`);
+    console.log(`3. ${colors.magenta}${colors.bright}[ QR SCAN ]${colors.reset} - Operación por QR (Terminal)`);
     console.log(`\n${colors.white}Audit: 4. Historial  5. Rebalancear  6. Salir${colors.reset}`);
 
     const sel = await question('\nNexus > ');

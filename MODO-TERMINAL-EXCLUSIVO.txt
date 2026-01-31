@@ -1,0 +1,76 @@
+==================================================
+💻 NODO QUÁNTICO - MODO TERMINAL EXCLUSIVO
+==================================================
+
+📅 Fecha: January 30, 2026
+📍 Cambio: Eliminación completa de interfaces web
+
+✅ CAMBIOS IMPLEMENTADOS:
+=======================
+
+ELIMINADOS:
+- minimal-login.html - Interface web de login
+- Todas las referencias a interfaces web
+- Opciones de abrir navegador
+
+MODIFICADOS:
+- nexus-cli.js - Actualizado para modo terminal exclusivo
+- Menús y mensajes actualizados
+- Descripciones claras de operación terminal
+
+MODO DE OPERACIÓN ACTUAL:
+=======================
+
+El nodo Nexus ahora opera EXCLUSIVAMENTE por comandos de terminal:
+
+COMANDO PRINCIPAL:
+node nexus-cli.js
+
+FLUJO DE OPERACIÓN:
+==================
+
+1. Ejecutar: node nexus-cli.js
+2. Sistema muestra: "NODO QUÁNTICO - MODO TERMINAL"
+3. Menú principal con opciones de terminal
+4. Todas las operaciones son interactivas por consola
+5. No hay interfaces web ni gráficas
+
+FUNCIONALIDADES DISPONIBLES:
+==========================
+
+✅ Envío de liquidaciones
+✅ Recepción de fondos
+✅ Operaciones QR por terminal
+✅ Procesamiento cuántico de QR
+✅ Verificación de liquidez
+✅ Historial de transacciones
+✅ Rebalanceo de pools
+
+VENTAJAS DEL MODO TERMINAL:
+=========================
+
+✅ Mayor velocidad de ejecución
+✅ Menos recursos del sistema
+✅ Operación más directa y eficiente
+✅ Sin dependencias de navegador
+✅ Total control por comandos
+✅ Seguridad maximizada
+✅ Compatibilidad universal
+
+ELIMINACIÓN DE INTERFACES WEB:
+============================
+
+Las siguientes interfaces fueron eliminadas:
+- Login web minimalista
+- Dashboard web
+- Quantum QR Payment web
+- Cualquier interface gráfica
+
+TODAS las operaciones ahora son:
+- 100% por terminal
+- 100% por comandos
+- 100% interactivas por consola
+
+==================================================
+SISTEMA OPERATIVO EXCLUSIVAMENTE POR TERMINAL
+==================================================
