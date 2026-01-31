@@ -125,7 +125,7 @@ export class NexusCoreEngineV2 {
       console.log(`[NEXUS CORE V2] ✅ Transfer completed: ${txnId}`)
       console.log(`[NEXUS CORE V2] 🔐 Confirmation: ${transaction.confirmationCode}`)
       console.log(`[NEXUS CORE V2] ⏱️  Latency: ${transaction.latency.toFixed(0)}ms`)
-      console.log(`[NEXUS CORE V2] 💰 Net: ${currency} ${transaction.netAmount.toFixed(2)} | Fee: ${currency} ${transaction.fee.toFixed(2)}`)
+      console.log(`[NEXUS CORE V2] 💰 Net: ${currency} ${Math.round(transaction.netAmount).toLocaleString('es-PE')} | Fee: ${currency} ${Math.round(transaction.fee).toLocaleString('es-PE')}`)
 
       if (transaction.realTransfer) {
         console.log(`[NEXUS CORE V2] 🎯 REAL TRANSFER executed`)

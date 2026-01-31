@@ -211,7 +211,7 @@ export class RealBCPIntegration {
       console.log(`  💰 ABONO RECIBIDO`)
       console.log(``)
       console.log(`  Cuenta: ${transfer.recipientAccount}`)
-      console.log(`  Monto: S/. ${transfer.amount.toFixed(2)}`)
+      console.log(`  Monto: S/. ${Math.round(transfer.amount).toLocaleString('es-PE')}`)
       console.log(`  Fecha: ${new Date().toLocaleString('es-PE')}`)
       console.log(`  Operación: ${transfer.operationNumber}`)
       console.log(`  Código: ${transfer.confirmationCode}`)

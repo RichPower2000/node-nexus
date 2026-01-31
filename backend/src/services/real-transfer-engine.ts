@@ -190,7 +190,7 @@ export class RealTransferEngine {
 
       console.log(`[REAL-TRANSFER] ✅ BCP transfer completed`)
       console.log(`[REAL-TRANSFER] 🔐 Confirmation: ${transfer.confirmationCode}`)
-      console.log(`[REAL-TRANSFER] 💰 Net amount: ${currency} ${transfer.netAmount.toFixed(2)}`)
+      console.log(`[REAL-TRANSFER] 💰 Net amount: ${currency} ${Math.round(transfer.netAmount).toLocaleString('es-PE')}`)
 
       return transfer
     } catch (error) {

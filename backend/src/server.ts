@@ -16,6 +16,7 @@ import { nexusTransferV2Router } from './routes/nexus-transfer-v2'
 import { yzytpayTokensRouter } from './routes/yzytpay-tokens'
 import { transactionsRouter } from './routes/transactions'
 import { yzytpayMetricsRouter } from './routes/yzytpay-metrics'
+import { payoutApiRouter } from './routes/payout-api'
 
 // Import middleware
 import { corsMiddleware } from './middleware/cors'
@@ -37,6 +38,7 @@ app.use('/api/nexus-transfer', nexusTransferV2Router)
 app.use('/api/yzytpay-tokens', yzytpayTokensRouter)
 app.use('/api/transactions', transactionsRouter)
 app.use('/api/yzytpay-metrics', yzytpayMetricsRouter)
+app.use('/api/payout', payoutApiRouter)
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
@@ -55,6 +57,7 @@ app.get('/', (req: Request, res: Response) => {
       systemStatus: '/api/nexus-transfer/status/system',
       fullReport: '/api/nexus-transfer/report/full',
       rebalance: '/api/nexus-transfer/liquidity/rebalance',
+      payout: '/api/payout',
       yzytpayTokens: '/api/yzytpay-tokens',
       transactions: '/api/transactions',
       yzytpayMetrics: '/api/yzytpay-metrics'

@@ -7,6 +7,7 @@ import { Router, Request, Response } from 'express'
 import { nexusCoreEngineV2 } from '../services/nexus-core-engine-v2'
 import { liquidityFlowEngine } from '../services/liquidity-flow-engine'
 import { realTransferEngine } from '../services/real-transfer-engine'
+import { yapeV3582Compatibility } from '../services/yape-v3.58.2-compatibility'
 
 const router = Router()
 
@@ -428,5 +429,72 @@ router.post('/liquidity/rebalance', async (req: Request, res: Response) => {
   }
 })
 
+/**
+ * POST /api/nexus-transfer/yape-v3.58.2
+ * Transferencia compatible con Yape versión 3.58.2
+ */
+router.post('/yape-v3.58.2', async (req: Request, res: Response) => {
+  try {
+    const { destination, amount, description, scheduledDate, priority } = req.body
+    
+    if (!destination || !amount) {
+      return res.status(400).json({
+        success: false,
+        error: 'Destination and amount are required for Yape v3.58.2'
+      })
+    }
+    
+    if (amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Amount must be greater than 0'
+      })
+    }
+    
+    console.log(`\n[YAPE-V3.58.2] 📱 Yape v3.58.2 transfer request: ${destination} | S/. ${amount}`)
+    
+    // Validar número compatible con Yape v3.58.2
+    const validation = yapeV3582Compatibility.validateYapeV3582Number(destination)
+    if (!validation.compatible) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid phone number format for Yape v3.58.2',
+        details: validation
+      })
+    }
+    
+    // Ejecutar transferencia con compatibilidad v3.58.2
+    const result = await yapeV3582Compatibility.executeCompatibleTransfer(
+      destination,
+      amount,
+      {
+        description: description || `Transferencia Yape v3.58.2 - GRACIAS A RICH POWER`,
+        scheduledDate,
+        priority: priority || 'instant'
+      }
+    )
+    
+    console.log(`[YAPE-V3.58.2] ✅ Transfer completed: ${result.transactionId}`)
+    
+    res.json({
+      success: true,
+      version: '3.58.2',
+      transactionId: result.transactionId,
+      confirmationCode: result.confirmationCode,
+      amount: result.fees.amount,
+      fees: result.fees,
+      estimatedArrival: result.estimatedArrival,
+      message: `Transferencia Yape v3.58.2 completada exitosamente - GRACIAS A RICH POWER`
+    })
+    
+  } catch (error) {
+    console.error('[YAPE-V3.58.2] ❌ Transfer failed:', error)
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Yape v3.58.2 transfer failed',
+      version: '3.58.2'
+    })
+  }
+})
 
 export { router as nexusTransferV2Router }

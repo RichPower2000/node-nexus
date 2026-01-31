@@ -192,7 +192,7 @@ export class LiquidityFlowEngine {
       this.metrics.totalFees += fee
 
       console.log(`[LIQUIDITY-FLOW] ✅ Flow completed: ${flowId}`)
-      console.log(`[LIQUIDITY-FLOW] 💵 Net amount: S/. ${netAmount.toFixed(2)} | Fee: S/. ${fee.toFixed(2)}`)
+      console.log(`[LIQUIDITY-FLOW] 💵 Net amount: S/. ${Math.round(netAmount).toLocaleString('es-PE')} | Fee: S/. ${Math.round(fee).toLocaleString('es-PE')}`)
 
       return flow
     } catch (error) {
@@ -239,7 +239,7 @@ export class LiquidityFlowEngine {
       nexusPool.balance += fee
     }
 
-    console.log(`[LIQUIDITY-FLOW] 📊 ${from}: S/. ${fromPool.balance.toFixed(2)} | ${to}: S/. ${toPool.balance.toFixed(2)}`)
+    console.log(`[LIQUIDITY-FLOW] 📊 ${from}: S/. ${Math.round(fromPool.balance).toLocaleString('es-PE')} | ${to}: S/. ${Math.round(toPool.balance).toLocaleString('es-PE')}`)
   }
 
   /**
@@ -293,7 +293,7 @@ export class LiquidityFlowEngine {
         )
 
         if (amountToMove > 1000) {
-          console.log(`[MESH-REBALANCE] � Transferring ${surplus.id} → ${deficit.id}: S/. ${amountToMove.toFixed(2)}`)
+          console.log(`[MESH-REBALANCE] 🔄 Transferring ${surplus.id} → ${deficit.id}: S/. ${Math.round(amountToMove).toLocaleString('es-PE')}`)
           surplus.balance -= amountToMove
           deficit.balance += amountToMove
         }
@@ -379,7 +379,7 @@ export class LiquidityFlowEngine {
     pool.lastUpdate = Date.now()
 
     console.log(`[LIQUIDITY-FLOW] 💰 Added S/. ${amount} to ${poolId} pool`)
-    console.log(`[LIQUIDITY-FLOW] 📊 New balance: S/. ${pool.balance.toFixed(2)}`)
+    console.log(`[LIQUIDITY-FLOW] 📊 New balance: S/. ${Math.round(pool.balance).toLocaleString('es-PE')}`)
 
     return true
   }

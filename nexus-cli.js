@@ -472,6 +472,46 @@ async function getSummary() {
     } catch (e) { }
 }
 
+async function showTransactionHistory() {
+    await showHeader();
+    console.log(`${colors.cyan}${colors.bright}📋 HISTORIAL DE TRANSACCIONES${colors.reset}\n`);
+    
+    try {
+        const res = await fetch(`${API_URL}/transactions?limit=20`);
+        const data = await res.json();
+        
+        if (data.success && data.transactions && data.transactions.length > 0) {
+            console.log(`${colors.blue}════════════════════════════════════════════════════════════════════════════════${colors.reset}`);
+            console.log(`${colors.white}${colors.bright}FECHA/HORA               TIPO     DESTINO          MONTO         ESTADO${colors.reset}`);
+            console.log(`${colors.blue}════════════════════════════════════════════════════════════════════════════════════${colors.reset}`);
+            
+            for (const tx of data.transactions) {
+                const date = new Date(tx.timestamp).toLocaleString('es-PE');
+                const type = tx.type.toUpperCase().padEnd(8);
+                const destination = tx.destination.toUpperCase().padEnd(12);
+                const amount = `S/. ${Math.round(tx.amount).toLocaleString('es-PE')}`.padEnd(18);
+                const status = tx.status === 'completed' ? 
+                    `${colors.green}COMPLETADO${colors.reset}` : 
+                    tx.status === 'processing' ? 
+                    `${colors.yellow}PROCESANDO${colors.reset}` : 
+                    `${colors.red}FALLIDO${colors.reset}`;
+                
+                console.log(`${colors.white}${date}   ${type}   ${destination}   ${amount}   ${status}${colors.reset}`);
+            }
+            
+            console.log(`${colors.blue}════════════════════════════════════════════════════════════════════════════════════${colors.reset}`);
+            console.log(`${colors.yellow}Total de transacciones: ${data.transactions.length}${colors.reset}`);
+        } else {
+            console.log(`${colors.yellow}No hay transacciones registradas.${colors.reset}`);
+        }
+    } catch (error) {
+        console.log(`${colors.red}Error al obtener el historial: ${error.message}${colors.reset}`);
+    }
+    
+    await question('\nPresione [ENTER] para volver al menú principal...');
+    mainMenu();
+}
+
 async function mainMenu() {
     await showHeader();
     await getSummary();
@@ -482,14 +522,14 @@ async function mainMenu() {
     console.log(`1. ${colors.green}${colors.bright}[ ENVIAR ]${colors.reset}  - Nueva Liquidación`);
     console.log(`2. ${colors.blue}${colors.bright}[ RECIBIR ]${colors.reset} - Nueva Recepción/Carga`);
     console.log(`3. ${colors.magenta}${colors.bright}[ QR SCAN ]${colors.reset} - Operación por QR (Terminal)`);
-    console.log(`\n${colors.white}Audit: 4. Historial  5. Rebalancear  6. Salir${colors.reset}`);
+    console.log(`\n${colors.white}Audit: 4. Historial (con montos)  5. Rebalancear  6. Salir${colors.reset}`);
 
     const sel = await question('\nNexus > ');
     switch (sel) {
         case '1': await executeSend(); break;
         case '2': await executeReceive(); break;
         case '3': await executeQRTransaction(); break;
-        case '4': exec(`explorer "${AUDIT_DIR}"`); mainMenu(); break;
+        case '4': await showTransactionHistory(); break;
         case '5':
             console.log(`${colors.magenta}Sincronizando Malla de 10 Billones...${colors.reset}`);
             await fetch(`${API_URL}/nexus-transfer/liquidity/rebalance`, { method: 'POST' });
