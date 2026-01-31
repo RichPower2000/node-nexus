@@ -41,10 +41,16 @@
                     <p class="text-sm text-slate-400">Operador</p>
                     <p class="font-bold" id="operatorDisplay">NEXUS-ADMIN</p>
                 </div>
-                <button onclick="window.location.href='DASHBOARD-INTEGRATED.html'" 
-                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-all">
-                    <i class="fas fa-arrow-left mr-2"></i>Volver
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="window.location.href='DASHBOARD-INTEGRATED.html'" 
+                            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-all">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver
+                    </button>
+                    <button onclick="logout()" 
+                            class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition-all font-bold">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -217,7 +223,7 @@
         
         // Authentication check
         if (!sessionStorage.getItem('auth_token')) {
-            window.location.href = '../LOGIN/LOGIN-SIMPLE.html';
+            window.location.href = '../LOGIN/quantum-login.html';
         }
         
         document.getElementById('operatorDisplay').innerText = sessionStorage.getItem('operator_id') || 'NEXUS-ADMIN';
@@ -513,6 +519,11 @@
                     </div>
                 `;
             }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '../LOGIN/quantum-login.html';
         }
 
         // Initialize on load

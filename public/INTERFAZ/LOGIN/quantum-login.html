@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Quantum Node</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass { 
+            backdrop-filter: blur(12px); 
+            background: rgba(15, 23, 42, 0.7); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+        .neon-glow { 
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); 
+        }
+        .pulse { 
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; 
+        }
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.7; } 
+        }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-md w-full px-6">
+        <!-- Logo and Description -->
+        <div class="text-center mb-12">
+            <div class="w-24 h-24 mx-auto mb-6 floating">
+                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center neon-glow pulse">
+                    <i class="fas fa-bolt text-white text-4xl"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-3xl font-bold text-white mb-3">NEXUS Quantum Node</h1>
+            
+            <div class="glass rounded-2xl p-6 border border-white/10">
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    Sistema de procesamiento cuántico de pagos por QR<br>
+                    <span class="text-cyan-400 font-medium">Liquidez: 10 Billones PEN</span><br>
+                    <span class="text-green-400">99.9% uptime garantizado</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="glass rounded-3xl p-8 border border-white/10">
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-slate-400 text-sm font-medium mb-2">
+                        <i class="fas fa-user mr-2"></i>Usuario
+                    </label>
+                    <input type="text" id="username" 
+                           class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-all"
+                           placeholder="Ingresa tu usuario" required>
+                </div>
+                
+                <div>
+                    <label class="block text-slate-400 text-sm font-medium mb-2">
+                        <i class="fas fa-lock mr-2"></i>Contraseña
+                    </label>
+                    <input type="password" id="password" 
+                           class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-all"
+                           placeholder="Ingresa tu contraseña" required>
+                </div>
+                
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Acceder al Sistema
+                </button>
+            </form>
+            
+            <!-- Quick Access Info -->
+            <div class="mt-8 pt-6 border-t border-white/10">
+                <p class="text-center text-slate-500 text-xs">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Accede para utilizar el procesamiento cuántico de QR
+                </p>
+            </div>
+        </div>
+
+        <!-- Credentials Help -->
+        <div class="mt-8 text-center">
+            <details class="glass rounded-2xl p-4 border border-white/10">
+                <summary class="text-slate-400 text-sm font-medium cursor-pointer">
+                    <i class="fas fa-key mr-2"></i>Credenciales de Acceso
+                </summary>
+                <div class="mt-3 text-left space-y-2 text-xs text-slate-400">
+                    <p><span class="text-green-400">admin</span> / admin123</p>
+                    <p><span class="text-blue-400">user</span> / user123</p>
+                    <p><span class="text-purple-400">ceo</span> / ceo123456</p>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const button = e.target.querySelector('button');
+            
+            if (!username || !password) {
+                alert('Por favor completa ambos campos');
+                return;
+            }
+            
+            // Store credentials in sessionStorage
+            sessionStorage.setItem('auth_token', 'nexus_quantum_' + Date.now());
+            sessionStorage.setItem('operator_id', username.toUpperCase());
+            sessionStorage.setItem('login_time', new Date().toISOString());
+            
+            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Accediendo...';
+            button.disabled = true;
+            
+            // Simulate login process
+            setTimeout(() => {
+                window.location.href = 'quantum-qr-payment.html';
+            }, 1500);
+        });
+        
+        // Auto-focus on username field
+        document.getElementById('username').focus();
+    </script>
+</body>
+</html>
