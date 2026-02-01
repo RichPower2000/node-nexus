@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-02-01T01:42:58.025Z",
+  "transactions": [
+    {
+      "id": "TXN-1769909302849-l1l3xi",
+      "type": "transfer",
+      "source": "nexus",
+      "destination": "yape",
+      "amount": 10000,
+      "currency": "PEN",
+      "status": "completed",
+      "timestamp": 1769909306952,
+      "latency": 4103.072633999982,
+      "hash": "00018ACA5834",
+      "realTransfer": true,
+      "recipientPhone": "975589800",
+      "confirmationCode": "VAL-EZN5UI",
+      "liquidityOptimized": false,
+      "liquidityScore": 85,
+      "fee": 50,
+      "netAmount": 9950
+    },
+    {
+      "id": "TXN-1769909144809-34qvtt",
+      "type": "transfer",
+      "source": "nexus",
+      "destination": "yape",
+      "amount": 5000,
+      "currency": "PEN",
+      "status": "completed",
+      "timestamp": 1769909148914,
+      "latency": 4105.163098999998,
+      "hash": "0000D168DA33",
+      "realTransfer": true,
+      "recipientPhone": "975589800",
+      "confirmationCode": "VAL-XFVGXV",
+      "liquidityOptimized": false,
+      "liquidityScore": 85,
+      "fee": 25,
+      "netAmount": 4975
+    },
+    {
+      "id": "TXN-1769908881246-4xq394",
+      "type": "transfer",
+      "source": "nexus",
+      "destination": "yape",
+      "amount": 100000,
+      "currency": "PEN",
+      "status": "completed",
+      "timestamp": 1769908885353,
+      "latency": 4107.055223000003,
+      "hash": "00026871566A",
+      "realTransfer": true,
+      "recipientPhone": "975589800",
+      "confirmationCode": "VAL-4OCZJ0",
+      "liquidityOptimized": false,
+      "liquidityScore": 85,
+      "fee": 500,
+      "netAmount": 99500
+    }
+  ]
+}

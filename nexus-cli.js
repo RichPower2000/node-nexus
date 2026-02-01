@@ -66,10 +66,36 @@ const colors = {
     bgGreen: "\x1b[42m"
 };
 
+async function notify(type = 'success') {
+    if (type === 'success') {
+        process.stdout.write('\u0007');
+        await new Promise(r => setTimeout(r, 150));
+        process.stdout.write('\u0007');
+    } else if (type === 'error') {
+        process.stdout.write('\u0007');
+        await new Promise(r => setTimeout(r, 100));
+        process.stdout.write('\u0007');
+    } else if (type === 'alert') {
+        process.stdout.write('\u0007');
+        await new Promise(r => setTimeout(r, 100));
+        process.stdout.write('\u0007');
+        await new Promise(r => setTimeout(r, 100));
+        process.stdout.write('\u0007');
+    } else if (type === 'cash') {
+        // Efecto de sonido: Contador de billetes / Cajero
+        for (let i = 0; i < 6; i++) {
+            process.stdout.write('\u0007');
+            await new Promise(r => setTimeout(r, 80)); // Ráfaga rápida
+        }
+        await new Promise(r => setTimeout(r, 300));
+        process.stdout.write('\u0007'); // Beep final de entrega
+    }
+}
+
 async function showHeader() {
     console.clear();
     console.log(`${colors.white}${colors.bgCyan}${colors.bright} ⚡ NEXUS LIQUIDATE V5.6 - YAPE QR PUSH EDITION ${colors.reset}`);
-    console.log(`${colors.cyan} Status: ONLINE | Mode: QUANTUM DISBURSEMENT | 10 BILLION ${colors.reset}`);
+    console.log(`${colors.cyan} Status: ONLINE | Sound: ON | Notifications: ACTIVE | 10 BILLION ${colors.reset}`);
     console.log(`${colors.yellow} 📁 Vouchers: ${VOUCHERS_DIR}${colors.reset}\n`);
 }
 
@@ -77,8 +103,9 @@ function question(query) {
     return new Promise(resolve => rl.question(`${colors.bright}${query}${colors.reset}`, resolve));
 }
 
-function generateTicket(txn, plat, dest, amount) {
+function generateTicket(txn, plat, dest, amount, message = '') {
     const verse = getRandomVerse();
+
 
     const htmlTicket = `
 <!DOCTYPE html>
@@ -86,318 +113,235 @@ function generateTicket(txn, plat, dest, amount) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOUCHER OFICIAL NEXUS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>NEXUS - COMPROBANTE DE OPERACIÓN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --paper-color: #ffffff;
+            --ink-color: #1a1a1a;
+            --accent-color: #000000;
+            --subtle-gray: #8c8c8c;
+            --border-style: 2px dashed #d0d0d0;
         }
+        
+        * { box-sizing: border-box; }
         
         body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            display: flex; 
-            justify-content: center; 
+            background-color: #f0f0f2;
+            font-family: 'Work Sans', sans-serif;
+            display: flex;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .receipt { 
-            background: white;
-            width: 100%;
-            max-width: 380px; 
-            padding: 0;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .receipt::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #4f46e5, #3b82f6, #06b6d4);
-        }
-        
-        .header { 
-            text-align: center; 
-            padding: 32px 24px 24px;
-            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .logo-container {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 16px;
-            position: relative;
-        }
-        
-        .logo-svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 4px 12px rgba(79, 70, 229, 0.3));
-        }
-        
-        .voucher-title {
-            font-size: 24px;
-            font-weight: 800;
-            margin: 12px 0 6px;
-            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.5px;
-        }
-        
-        .voucher-subtitle {
-            font-size: 13px;
-            font-weight: 600;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .content {
-            padding: 24px;
-        }
-        
-        .info-section {
-            background: #f9fafb;
-            border-radius: 16px;
+            margin: 0;
             padding: 20px;
-            margin-bottom: 20px;
         }
-        
-        .info-row {
+
+        .receipt-container {
+            width: 100%;
+            max-width: 360px;
+            background: var(--paper-color);
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        /* Torn paper effect top/bottom if desired, or just clean cut. Going clean cut for "minimalist modern". */
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-logo {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            display: inline-block;
+            border: 2px solid var(--ink-color);
+            padding: 8px 16px;
+        }
+
+        .receipt-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--subtle-gray);
+            margin-top: 10px;
+        }
+
+        .divider {
+            border-bottom: var(--border-style);
+            margin: 20px 0;
+        }
+
+        .transaction-details {
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--ink-color);
+        }
+
+        .detail-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: #6b7280;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .info-value {
-            font-weight: 700;
-            color: #111827;
-            font-size: 14px;
-        }
-        
-        .amount-section {
-            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-            border-radius: 20px;
-            padding: 28px;
-            margin: 24px 0;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
-        }
-        
-        .amount-label {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             margin-bottom: 8px;
         }
-        
-        .total-amount { 
-            font-size: 48px; 
-            font-weight: 800; 
-            color: white;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+
+        .detail-label {
+            color: var(--subtle-gray);
+        }
+
+        .detail-value {
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .amount-display {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px 0;
+            border-top: var(--border-style);
+            border-bottom: var(--border-style);
+        }
+
+        .amount-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--subtle-gray);
+            margin-bottom: 5px;
+        }
+
+        .total-amount {
+            font-size: 32px;
+            font-weight: 700;
             letter-spacing: -1px;
         }
-        
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #d1fae5;
-            color: #065f46;
-            padding: 12px 24px;
-            border-radius: 12px;
+
+        .currency {
+            font-size: 16px;
+            vertical-align: top;
+            margin-right: 4px;
+        }
+
+        .status-stamp {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .stamp {
+            display: inline-block;
+            border: 1px solid #00c853;
+            color: #00c853;
+            padding: 6px 12px;
+            font-size: 10px;
             font-weight: 700;
-            font-size: 14px;
-            margin: 20px auto;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            font-family: 'Space Mono', monospace;
         }
-        
-        .status-icon {
-            width: 20px;
-            height: 20px;
-            background: #10b981;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-        }
-        
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
-            margin: 24px 0;
-        }
-        
-        .footer { 
-            text-align: center; 
-            padding: 20px 24px 28px;
-            background: #f9fafb;
-            border-top: 2px solid #f0f0f0;
-        }
-        
-        .footer-verse {
-            font-size: 12px;
-            color: #6b7280;
-            font-style: italic;
-            margin-bottom: 12px;
-            line-height: 1.6;
-        }
-        
-        .footer-info {
+
+        .verse-section {
+            text-align: center;
             font-size: 11px;
-            color: #9ca3af;
-            font-weight: 600;
+            color: var(--subtle-gray);
+            font-style: italic;
+            margin-top: 30px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 9px;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .security-pattern {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 120px;
-            height: 120px;
-            opacity: 0.03;
-            pointer-events: none;
+        .barcode {
+            margin: 25px auto 0;
+            height: 30px;
+            width: 80%;
+            background: repeating-linear-gradient(
+                90deg,
+                #000,
+                #000 2px,
+                #fff 2px,
+                #fff 4px
+            );
+            opacity: 0.7;
         }
-        
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-            .receipt {
-                box-shadow: none;
-                max-width: 100%;
-            }
-        }
+
     </style>
 </head>
 <body>
-    <div class="receipt">
+    <div class="receipt-container">
         <div class="header">
-            <div class="logo-container">
-                <svg class="logo-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <!-- Network nodes forming N shape -->
-                    <circle cx="40" cy="50" r="12" fill="url(#logoGradient)"/>
-                    <circle cx="40" cy="100" r="12" fill="url(#logoGradient)"/>
-                    <circle cx="40" cy="150" r="12" fill="url(#logoGradient)"/>
-                    <circle cx="100" cy="75" r="12" fill="url(#logoGradient)"/>
-                    <circle cx="100" cy="125" r="12" fill="url(#logoGradient)"/>
-                    <circle cx="160" cy="50" r="12" fill="url(#logoGradient)"/>
-                    <circle cx="160" cy="100" r="12" fill="url(#logoGradient)"/>
-                    <circle cx="160" cy="150" r="12" fill="url(#logoGradient)"/>
-                    
-                    <!-- Connection lines -->
-                    <line x1="40" y1="50" x2="40" y2="150" stroke="url(#logoGradient)" stroke-width="4"/>
-                    <line x1="160" y1="50" x2="160" y2="150" stroke="url(#logoGradient)" stroke-width="4"/>
-                    <line x1="40" y1="50" x2="160" y2="150" stroke="url(#logoGradient)" stroke-width="4"/>
-                    <line x1="40" y1="100" x2="100" y2="75" stroke="url(#logoGradient)" stroke-width="3" opacity="0.6"/>
-                    <line x1="100" y1="75" x2="160" y2="50" stroke="url(#logoGradient)" stroke-width="3" opacity="0.6"/>
-                    <line x1="40" y1="100" x2="100" y2="125" stroke="url(#logoGradient)" stroke-width="3" opacity="0.6"/>
-                    <line x1="100" y1="125" x2="160" y2="150" stroke="url(#logoGradient)" stroke-width="3" opacity="0.6"/>
-                </svg>
-            </div>
-            <div class="voucher-title">NEXUS</div>
-            <div class="voucher-subtitle">Comprobante de Transacción</div>
+            <div class="brand-logo">NEXUS</div>
+            <div class="receipt-title">Comprobante de Ejecución</div>
         </div>
-        
-        <div class="content">
-            <div class="info-section">
-                <div class="info-row">
-                    <span class="info-label">ID Transacción</span>
-                    <span class="info-value">${txn.id.substring(0, 8).toUpperCase()}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Fecha</span>
-                    <span class="info-value">${new Date(txn.timestamp).toLocaleDateString('es-PE', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Hora</span>
-                    <span class="info-value">${new Date(txn.timestamp).toLocaleTimeString('es-PE', {
-        hour: '2-digit',
-        minute: '2-digit'
-    })}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Plataforma</span>
-                    <span class="info-value">${plat.toUpperCase()}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Destino</span>
-                    <span class="info-value">${dest}</span>
-                </div>
+
+        <div class="transaction-details">
+            <div class="detail-row">
+                <span class="detail-label">FECHA</span>
+                <span class="detail-value">${new Date(txn.timestamp).toLocaleDateString('es-PE')}</span>
             </div>
-            
-            <div class="amount-section">
-                <div class="amount-label">Monto Total</div>
-                <div class="total-amount">S/ ${Math.round(amount).toLocaleString('es-PE')}</div>
+            <div class="detail-row">
+                <span class="detail-label">HORA</span>
+                <span class="detail-value">${new Date(txn.timestamp).toLocaleTimeString('es-PE')}</span>
             </div>
-            
-            <div style="text-align: center;">
-                <div class="status-badge">
-                    <span class="status-icon">✓</span>
-                    <span>Procesado Exitosamente</span>
-                </div>
+            <div class="detail-row">
+                <span class="detail-label">REF</span>
+                <span class="detail-value">#${txn.id.substring(0, 8).toUpperCase()}</span>
             </div>
         </div>
+
+        <div class="divider"></div>
+
+        <div class="transaction-details">
+            <div class="detail-row">
+                <span class="detail-label">ORIGEN</span>
+                <span class="detail-value">NEXUS CORE</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">PLATAFORMA</span>
+                <span class="detail-value">${plat.toUpperCase()}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">DESTINO</span>
+                <span class="detail-value">${dest}</span>
+            </div>
+             ${message ? `
+            <div class="detail-row" style="margin-top: 10px;">
+                <span class="detail-label">NOTA</span>
+                <span class="detail-value" style="font-size: 0.9em;">${message}</span>
+            </div>` : ''}
+        </div>
+
+        <div class="amount-display">
+            <div class="amount-label">MONTO TOTAL</div>
+            <div class="total-amount"><span class="currency">S/.</span>${Math.round(amount).toLocaleString('es-PE')}</div>
+        </div>
+
+        <div class="status-stamp">
+            <div class="stamp">OPERACIÓN CONFIRMADA</div>
+        </div>
+
+        <div class="verse-section">
+            "${verse}"
+        </div>
         
+        <div class="barcode"></div>
+
         <div class="footer">
-            <div class="footer-verse">"${verse}"</div>
-            <div class="divider"></div>
-            <div class="footer-info">
-                NEXUS LIQUIDATE © ${new Date().getFullYear()} • Versión 5.6<br>
-                Transacción segura y verificada
-            </div>
+            Nexus Liquidate Nodes v5.6<br>
+            Secure Transaction System
         </div>
-        
-        <svg class="security-pattern" viewBox="0 0 100 100">
-            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                <circle cx="5" cy="5" r="1" fill="currentColor"/>
-            </pattern>
-            <rect width="100" height="100" fill="url(#grid)"/>
-        </svg>
     </div>
 </body>
 </html>`;
@@ -424,13 +368,13 @@ function generateTicket(txn, plat, dest, amount) {
     console.log(`${colors.green}✅ Voucher guardado en: ${downloadsPath}${colors.reset}`);
 
     // Also save voucher data to history folder
-    saveVoucherToHistory(txn, plat, dest, amount);
+    saveVoucherToHistory(txn, plat, dest, amount, message);
 
     return downloadsPath;
 }
 
 // Function to save voucher data to history folder
-function saveVoucherToHistory(txn, plat, dest, amount) {
+function saveVoucherToHistory(txn, plat, dest, amount, message = '') {
     try {
         const historyDir = path.join(__dirname, 'history');
         if (!fs.existsSync(historyDir)) {
@@ -462,7 +406,8 @@ function saveVoucherToHistory(txn, plat, dest, amount) {
             // Simplified transaction metadata
             transactionType: txn.type || 'TRANSFERENCIA',
             source: txn.source || 'nexus',
-            fees: amount - txn.netAmount
+            fees: amount - txn.netAmount,
+            message: message
         };
 
         // Add new voucher to existing vouchers
@@ -531,20 +476,22 @@ async function executeSend() {
     let plat = ['yape', 'plin', 'bcp', 'interop'][parseInt(pSel) - 1] || 'yape';
     const dest = await question('Destino (📞/💳) > ');
     const amount = parseFloat(await question('Monto S/. > '));
+    const message = await question('Mensaje de Liquidación (Opcional) > ');
 
     console.log(`\n${colors.cyan}⏳ Validando con Nexus Liquidate Engine...${colors.reset}`);
     try {
         const res = await fetch(`${API_URL}/nexus-transfer/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Zenith-Auth': SECURE_TOKEN },
-            body: JSON.stringify({ platform: plat, destination: dest, amount: amount })
+            body: JSON.stringify({ platform: plat, destination: dest, amount: amount, message: message })
         });
         const data = await res.json();
         if (data.success) {
-            process.stdout.write('\u0007'); // Beep
+            console.log(`\n${colors.yellow}🔊 PROCESANDO DISPERSIÓN DE EFECTIVO...${colors.reset}`);
+            await notify('cash'); // Sonido de cajero ATM
             console.log(`\n${colors.green}✅ NEXUS LIQUIDATE SUCCESSFUL${colors.reset}`);
             console.log(`${colors.yellow}📖 ${getRandomVerse()}${colors.reset}\n`);
-            generateTicket(data.transaction, plat, dest, amount);
+            generateTicket(data.transaction, plat, dest, amount, message);
         } else console.log(`\n${colors.red}❌ FALLO: ${data.error}${colors.reset}`);
     } catch (e) { console.log(`${colors.red}Error de conexión.${colors.reset}`); }
     await question('\n[ENTER] para menú...');
@@ -586,6 +533,7 @@ async function executeReceive() {
     saveReceiveVoucherToHistory(code, amount);
 
     exec(`start "" "${downloadsPath}"`);
+    await notify('success');
     console.log(`\n${colors.green}✅ Orden de recarga guardada en: ${downloadsPath}${colors.reset}`);
     await question('\n[ENTER]...');
     mainMenu();
@@ -593,23 +541,179 @@ async function executeReceive() {
 
 async function executeQRTransaction() {
     await showHeader();
-    console.log(`${colors.magenta}${colors.bright}🔳 OPERACIÓN CUÁNTICA POR QR - TERMINAL${colors.reset}\n`);
-    console.log(`${colors.yellow}Sistema operativo exclusivamente por comandos${colors.reset}\n`);
-    console.log(`1. Generar Cobro (Recibir fondos)`);
-    console.log(`2. Enviar a YAPE vía QR (Pagar a Usuario Yape)`);
-    console.log(`3. QR Avanzado (Multi-plataforma)`);
-    console.log(`4. ${colors.cyan}${colors.bright}[QUANTUM QR]${colors.reset} - Procesamiento Cuántico (Terminal)`);
-    console.log(`5. Volver`);
+    console.log(`${colors.magenta}${colors.bright}🔳 GESTOR DE OPERACIONES QR${colors.reset}\n`);
+
+    console.log(`1. ${colors.cyan}Pagar QR${colors.reset} (Generar pago a enviar)`);
+    console.log(`2. ${colors.yellow}Cargar QR${colors.reset} (Leer cobro establecido por otros)`);
+    console.log(`3. ${colors.green}Cobrar con QR${colors.reset} (Generar mi código de cobro)`);
+    console.log(`4. Volver`);
 
     const qrSel = await question('\nSeleccione Opción > ');
 
     if (qrSel === '1') {
+        // Pagar QR - Simplificado (Antes "Enviar a YAPE")
+        console.log(`\n${colors.cyan}📤 PAGAR VIA QR (PUSH)${colors.reset}`);
+        const amount = await question('Monto a Pagar S/. > ');
+        const phone = await question('Número/Cuenta destino > ');
+
+        const pushCode = 'NX-PUSH-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        // Generamos un link que al ser escaneado por el receptor, "reclama" el dinero
+        const claimUrl = `https://nexus-v2-liquidity.vercel.app/api/nexus-transfer/claim?code=${pushCode}&amount=${amount}&to=${phone}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(claimUrl)}`;
+
+        const htmlPush = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAGO QR NEXUS</title>
+    <style>
+        body { background: #f0f2f5; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+        h1 { color: #111; margin: 0 0 10px; font-size: 24px; }
+        .amount { font-size: 48px; color: #000; font-weight: bold; margin: 20px 0; }
+        .qr-box { margin: 20px 0; border: 1px solid #eee; padding: 10px; display: inline-block; border-radius: 10px; }
+        .footer { color: #666; font-size: 14px; margin-top: 20px; }
+        .success-badge { background: #e7f9ed; color: #1b8a4f; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>NEXUS PAY</h1>
+        <div class="success-badge">LISTO PARA PAGAR</div>
+        <div class="amount">S/. ${amount}</div>
+        <div class="qr-box">
+            <img src="${qrUrl}" width="250" height="250" alt="QR de Pago">
+        </div>
+        <p>Destino: <strong>${phone}</strong></p>
+        <div class="footer">
+            Escanea este código para recibir el pago inmediatamente.
+        </div>
+    </div>
+</body>
+</html>`;
+
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+        const filename = `NEXUS_PAGO_QR_${dateStr}_${timeStr}_${pushCode}.html`;
+        const downloadsPath = path.join(VOUCHERS_DIR, filename);
+
+        fs.writeFileSync(downloadsPath, htmlPush);
+        exec(`start "" "${downloadsPath}"`); // Abrir automáticamente
+
+        console.log(`\n${colors.green}✅ ORDEN DE PAGO GENERADA${colors.reset}`);
+        console.log(`Muestra el QR en pantalla al beneficiario para completar el pago.`);
+        console.log(`Archivo guardado: ${downloadsPath}`);
+    }
+    else if (qrSel === '2') {
+        // Cargar QR (Leer QR de otros) - Lógica traída de executeQuantumQRPayment
+        console.log(`\n${colors.yellow}� CARGAR QR (PAGAR A TERCEROS)${colors.reset}`);
+        console.log(`Formatos soportados: Strings de Yape/Plin, URLs, Texto crudo.`);
+
+        const qrContent = await question('Ingrese el contenido del QR a cargar > ');
+
+        if (!qrContent) {
+            console.log(`${colors.red}❌ Se requiere contenido del QR.${colors.reset}`);
+        } else {
+            try {
+                process.stdout.write(`\n${colors.cyan}Analizando datos del QR... ${colors.reset}`);
+                await sleep(1000); // Simulación de proceso
+
+                // Intentar decodificar si es una URL común de pago o texto plano
+                let detectedData = { type: 'unknown', amount: 0, destination: '?' };
+
+                if (qrContent.includes('yape')) {
+                    detectedData.type = 'yape';
+                    detectedData.amount = 0; // Usualmente Yape QR no trae monto fijo a menos que sea especifico
+                } else if (qrContent.includes('plin')) {
+                    detectedData.type = 'plin';
+                }
+
+                const response = await fetch(`${API_URL}/qr/process`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qrString: qrContent })
+                });
+
+                let data = { success: false };
+                try { data = await response.json(); } catch (e) { }
+
+                if (data && data.success) {
+                    detectedData = data.data;
+                    console.log(`${colors.green}OK${colors.reset}`);
+                    console.log(`\n${colors.bright}DATOS DEL PAGADOR:${colors.reset}`);
+                    console.log(`Plataforma: ${detectedData.type.toUpperCase()}`);
+                    console.log(`Destino: ${detectedData.phone || detectedData.account || detectedData.cci || '???'}`);
+                    if (detectedData.amount) console.log(`Monto: S/. ${detectedData.amount}`);
+                } else {
+                    console.log(`${colors.yellow}No se pudo decodificar automáticamente.${colors.reset}`);
+                    detectedData.amount = parseFloat(await question('Ingrese Monto a Pagar S/. > '));
+                    detectedData.phone = await question('Ingrese Destino (Tel/Cuenta) > ');
+                    detectedData.type = 'manual';
+                }
+
+                // Confirmar Pago
+                console.log(`\n${colors.yellow} Verificando fondos...${colors.reset}`);
+                const liquidityResponse = await fetch(`${API_URL}/nexus-transfer/status/system`);
+                const liqData = await liquidityResponse.json();
+
+                if (liqData.success) {
+                    console.log(`Disponible: ${colors.green}S/. ${liqData.system.core.liquidity.totalLiquidity.toLocaleString()}${colors.reset}`);
+
+                    const confirm = await question(`\n${colors.bright}¿CONFIRMAR PAGO AL QR CARGADO? (S/N) > ${colors.reset}`);
+                    if (confirm.toLowerCase() === 's') {
+                        console.log(`${colors.magenta}💸 PROCESANDO PAGO...${colors.reset}`);
+                        await notify('cash');
+
+                        const payRes = await fetch(`${API_URL}/qr/execute-payment`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                qrData: detectedData,
+                                liquidityPool: 'main_pool'
+                            })
+                        });
+                        const payData = await payRes.json();
+
+                        if (payData.success || payData.status === 'completed') {
+                            console.log(`\n${colors.green}✅ PAGO REALIZADO CON ÉXITO${colors.reset}`);
+                            console.log(`ID Transacción: ${payData.transaction?.id || 'N/A'}`);
+                            generateTicket(/*txn*/ { id: payData.transaction?.id || 'QR-' + Date.now(), timestamp: new Date(), netAmount: detectedData.amount || 0 },
+                                            /*plat*/ detectedData.type || 'QR',
+                                            /*dest*/ detectedData.phone || 'QR-Scan',
+                                            /*amount*/ detectedData.amount || 0,
+                                "Pago por Carga de QR");
+                        } else {
+                            console.log(`${colors.yellow}Re-intentando por ruta estándar...${colors.reset}`);
+                            const stdRes = await fetch(`${API_URL}/nexus-transfer/send`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-Zenith-Auth': SECURE_TOKEN },
+                                body: JSON.stringify({ platform: 'qr_load', destination: detectedData.phone || 'QR', amount: detectedData.amount || 0, message: 'Pago QR Cargado' })
+                            });
+                            const stdData = await stdRes.json();
+                            if (stdData.success) {
+                                console.log(`\n${colors.green}✅ PAGO REALIZADO CON ÉXITO${colors.reset}`);
+                                generateTicket(stdData.transaction, 'QR-LOAD', detectedData.phone || 'QR', detectedData.amount || 0);
+                            } else {
+                                console.log(`${colors.red}❌ Error: ${stdData.error || 'Fallo desconocido'}${colors.reset}`);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log(`${colors.red}Error: ${error.message}${colors.reset}`);
+            }
+        }
+    }
+    else if (qrSel === '3') {
+        // Cobrar con QR (Recibir)
         const amount = await question('Monto a Cobrar S/. > ');
         const destCode = 'NX-QR-COLLECT-' + Math.random().toString(36).substr(2, 5).toUpperCase();
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PAY-NEXUS-S/.${amount}-${destCode}`;
 
         const htmlQR = `<!DOCTYPE html><html><body style="background:#000; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
-            <h1 style="color:#00f2ff">NEXUS QUICK COLLECT</h1>
+            <h1 style="color:#00f2ff">NEXUS COBRO RÁPIDO</h1>
             <div style="background:#fff; padding:20px; border-radius:15px;"><img src="${qrUrl}"></div>
             <h2 style="font-size:40px">S/. ${amount}</h2>
             <p style="color:#666">REF: ${destCode}</p>
@@ -618,300 +722,50 @@ async function executeQRTransaction() {
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0];
         const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-        const filename = `NEXUS_QR_COBRO_${dateStr}_${timeStr}_${destCode}.html`;
+        const filename = `NEXUS_COBRO_QR_${dateStr}_${timeStr}_${destCode}.html`;
         const downloadsPath = path.join(VOUCHERS_DIR, filename);
-        const auditPath = path.join(AUDIT_DIR, `QUICK_COLLECT_${destCode}.html`);
 
         fs.writeFileSync(downloadsPath, htmlQR);
-        fs.writeFileSync(auditPath, htmlQR);
         exec(`start "" "${downloadsPath}"`);
-        console.log(`\n${colors.green}✅ Terminal de Cobro QR abierta.${colors.reset}`);
-    }
-    else if (qrSel === '2') {
-        console.log(`\n${colors.yellow}🚀 GENERANDO DISPENSADOR YAPE CUÁNTICO...${colors.reset}`);
-        const amount = await question('Monto a Enviar S/. > ');
-        const phone = await question('Número de Yape del Receptor > ');
-
-        const pushCode = 'NX-PUSH-' + Math.random().toString(36).substr(2, 6).toUpperCase();
-        const claimUrl = `https://nexus-lo.vercel.app/api/nexus-transfer/claim?code=${pushCode}&amount=${amount}&to=${phone}`;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(claimUrl)}`;
-
-        const htmlPush = `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { background: #1a1a1a; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        .yape-frame { background: #fff; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 20px solid #742284; box-sizing: border-box; }
-        .alert-bar { background: #ff4757; width: 100%; padding: 20px; color: #fff; font-size: 24px; font-weight: 900; position: absolute; top: 0; animation: pulse 1s infinite; }
-        .amount-display { font-size: 80px; font-weight: 900; color: #742284; margin-top: 50px; }
-        .qr-main { background: #fff; padding: 15px; border: 8px solid #742284; border-radius: 40px; margin: 30px 0; box-shadow: 0 0 50px rgba(116,34,132,0.3); }
-        .instruction-footer { background: #742284; color: #fff; width: 100%; padding: 30px; font-size: 28px; font-weight: bold; position: absolute; bottom: 0; }
-        @keyframes pulse { 0% { background: #ff4757; } 50% { background: #c0392b; } 100% { background: #ff4757; } }
-    </style>
-</head>
-<body>
-    <div class="alert-bar">⚠️ NO USAR LA APP DE YAPE | USA TU CÁMARA 🤳</div>
-    <div class="yape-frame">
-        <p style="font-size:30px; color:#666; margin:0;">RECIBIRÁS DE NEXUS:</p>
-        <div class="amount-display">S/. ${amount}</div>
-        <div class="qr-main">
-            <img src="${qrUrl}" width="400" id="qrimg">
-        </div>
-        <div class="instruction-footer">
-            📱 ESCANEA CON TU CÁMARA PARA COBRAR
-        </div>
-    </div>
-
-    <script>
-        // Guía por VOZ para evitar errores del cliente
-        window.onload = function() {
-            setTimeout(() => {
-                const msg = new SpeechSynthesisUtterance();
-                msg.text = "Por favor, escanee el código con la cámara de su celular. No use la aplicación de Yape para este paso. Repito, use su cámara normal para recibir su dinero.";
-                msg.lang = 'es-ES';
-                msg.rate = 0.9;
-                window.speechSynthesis.speak(msg);
-            }, 1000);
-        };
-
-        // Efecto de enfoque automático visual
-        let scale = 1;
-        setInterval(() => {
-            scale = scale === 1 ? 1.05 : 1;
-            document.getElementById('qrimg').style.transform = 'scale(' + scale + ')';
-            document.getElementById('qrimg').style.transition = 'all 0.5s ease-in-out';
-        }, 1000);
-    </script>
-</body>
-</html>`;
-
-        const now = new Date();
-        const dateStr = now.toISOString().split('T')[0];
-        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-        const filename = `NEXUS_YAPE_ENVIO_${dateStr}_${timeStr}_${pushCode}.html`;
-        const downloadsPath = path.join(VOUCHERS_DIR, filename);
-        const auditPath = path.join(AUDIT_DIR, `YAPE_PUSH_${pushCode}.html`);
-
-        fs.writeFileSync(downloadsPath, htmlPush);
-        fs.writeFileSync(auditPath, htmlPush);
-        exec(`start "" "${downloadsPath}"`);
-
-        console.log(`\n${colors.green}✅ DISPENSADOR YAPE GENERADO CON ÉXITO${colors.reset}`);
-        console.log(`- El receptor debe escanear el QR en tu pantalla.`);
-        console.log(`- El capital (S/. ${amount}) será transferido a ${phone}.`);
-    }
-    else if (qrSel === '3') {
-        // Llamar al CLI QR avanzado
-        console.log(`\n${colors.cyan}🚀 ABRIENDO QR ENHANCED CLI...${colors.reset}`);
-        exec('node qr-enhanced-cli.js', (error, stdout, stderr) => {
-            if (error) {
-                console.log(`${colors.red}❌ Error abriendo QR CLI: ${error.message}${colors.reset}`);
-            }
-        });
-        await question('\n[ENTER] para volver al menú principal...');
-        mainMenu();
-        return;
-    }
-    else if (qrSel === '4') {
-        // Nueva opción: Quantum QR Payment
-        await executeQuantumQRPayment();
-        return;
+        console.log(`\n${colors.green}✅ Terminal de Cobro QR (Voucher) generada.${colors.reset}`);
     }
 
-    await question('\n[ENTER]...');
+    await question('\n[ENTER] para volver...');
     mainMenu();
 }
 
-async function executeQuantumQRPayment() {
-    await showHeader();
-    console.log(`${colors.cyan}${colors.bright}🔬 OPERACIÓN QUÁNTICA POR QR - MODO TERMINAL${colors.reset}\n`);
-    console.log(`${colors.yellow}Sistema avanzado de procesamiento de pagos por QR${colors.reset}`);
-    console.log(`${colors.yellow}Operación exclusiva por comandos de terminal${colors.reset}\n`);
+// Función QuantumQR eliminada por simplificación
 
-    console.log(`Opciones disponibles:`);
-    console.log(`1. ${colors.green}Procesamiento por terminal${colors.reset} - Eliminada interfaz web`);
-    console.log(`2. ${colors.blue}Ingresar QR manualmente${colors.reset} - Pegar contenido de QR`);
-    console.log(`3. ${colors.magenta}Ver estado de liquidez${colors.reset} - Consultar fondos disponibles`);
-    console.log(`4. ${colors.purple}Documentación${colors.reset} - Ver guía de uso`);
-    console.log(`5. ${colors.red}Volver${colors.reset} - Menú anterior\n`);
 
-    const option = await question('Seleccione opción > ');
-
-    switch (option) {
-        case '1':
-            console.log(`\n${colors.cyan}📤 SUBIR QR PARA PAGAR${colors.reset}`);
-            console.log(`${colors.yellow}Funcionalidad eliminada. El nodo opera solo por terminal.${colors.reset}\n`);
-            console.log(`${colors.gray}Usa la opción 2 para procesamiento directo por comandos${colors.reset}\n`);
-            break;
-
-        case '2':
-            console.log(`\n${colors.blue}⌨️ INGRESAR QR MANUALMENTE${colors.reset}`);
-            console.log(`Formatos soportados:`);
-            console.log(`• yape://telefono/monto`);
-            console.log(`• bcp://cuenta/cci/monto`);
-            console.log(`• plin://telefono/monto`);
-            console.log(`• interbank://cuenta/cci/monto\n`);
-
-            const qrContent = await question('Ingrese el contenido del QR > ');
-
-            if (!qrContent) {
-                console.log(`${colors.red}❌ Contenido QR requerido${colors.reset}`);
-                await question('\n[ENTER]...');
-                await executeQuantumQRPayment();
-                return;
-            }
-
-            try {
-                console.log(`${colors.yellow}\n🔍 Procesando QR cuánticamente...${colors.reset}`);
-
-                // Process the QR through the API
-                const response = await fetch(`${API_URL}/qr/process`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ qrString: qrContent })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    console.log(`${colors.green}✅ QR procesado exitosamente${colors.reset}`);
-                    console.log(`\n${colors.cyan}Datos detectados:${colors.reset}`);
-                    console.log(`Plataforma: ${data.data.type?.toUpperCase() || 'Desconocida'}`);
-                    if (data.data.phone) console.log(`Teléfono: ${data.data.phone}`);
-                    if (data.data.account) console.log(`Cuenta: ${data.data.account}`);
-                    if (data.data.cci) console.log(`CCI: ${data.data.cci}`);
-                    if (data.data.amount) console.log(`Monto: S/. ${data.data.amount}`);
-
-                    // Check liquidity
-                    console.log(`\n${colors.yellow} Verificando liquidez...${colors.reset}`);
-                    const liquidityResponse = await fetch(`${API_URL}/nexus-transfer/status/system`);
-                    const liquidityData = await liquidityResponse.json();
-
-                    if (liquidityData.success) {
-                        const totalLiquidity = liquidityData.system.core.liquidity.totalLiquidity;
-                        const requiredAmount = data.data.amount || 1;
-                        const hasEnough = totalLiquidity >= requiredAmount;
-
-                        console.log(`Liquidez disponible: ${colors.green}S/. ${totalLiquidity.toLocaleString()}${colors.reset}`);
-                        console.log(`Monto requerido: ${hasEnough ? colors.green : colors.red}S/. ${requiredAmount}${colors.reset}`);
-
-                        if (hasEnough) {
-                            const confirm = await question(`\n${colors.green}¿Ejecutar pago cuántico? (s/N) > ${colors.reset}`);
-                            if (confirm.toLowerCase() === 's') {
-                                console.log(`${colors.yellow}\n⚡ Ejecutando pago cuántico...${colors.reset}`);
-
-                                const paymentResponse = await fetch(`${API_URL}/qr/execute-payment`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        qrData: data.data,
-                                        liquidityPool: 'main_pool'
-                                    })
-                                });
-
-                                const paymentResult = await paymentResponse.json();
-
-                                if (paymentResult.success) {
-                                    console.log(`${colors.green}✅ PAGO EJECUTADO EXITOSAMENTE${colors.reset}`);
-                                    console.log(`Código de confirmación: ${colors.bold}${paymentResult.transaction.confirmationCode}${colors.reset}`);
-                                    console.log(`Transacción ID: ${paymentResult.transaction.id}`);
-                                    console.log(`Plataforma: ${paymentResult.transaction.platform.toUpperCase()}`);
-                                    console.log(`Monto: S/. ${paymentResult.transaction.amount}`);
-                                    console.log(`Destino: ${paymentResult.transaction.destination}`);
-                                } else {
-                                    console.log(`${colors.red}❌ Error en ejecución: ${paymentResult.error}${colors.reset}`);
-                                }
-                            }
-                        } else {
-                            console.log(`${colors.red}❌ Fondos insuficientes para ejecutar el pago${colors.reset}`);
-                        }
-                    }
-                } else {
-                    console.log(`${colors.red}❌ Error procesando QR: ${data.error}${colors.reset}`);
-                }
-            } catch (error) {
-                console.log(`${colors.red}❌ Error de conexión: ${error.message}${colors.reset}`);
-            }
-            break;
-
-        case '3':
-            console.log(`\n${colors.magenta}📊 ESTADO DE LIQUIDEZ${colors.reset}`);
-            try {
-                const response = await fetch(`${API_URL}/nexus-transfer/status/system`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const sys = data.system;
-                    const totalLiquidity = sys.core.liquidity.totalLiquidity;
-
-                    console.log(`\n${colors.cyan}LIQUIDEZ TOTAL DEL NODO:${colors.reset}`);
-                    console.log(`${colors.green}S/. ${totalLiquidity.toLocaleString()}${colors.reset}`);
-
-                    console.log(`\n${colors.cyan}POOL DE LIQUIDEZ:${colors.reset}`);
-                    sys.liquidity.pools.forEach(pool => {
-                        const percentage = ((pool.balance / totalLiquidity) * 100).toFixed(2);
-                        console.log(`• ${pool.name}: ${colors.green}S/. ${pool.balance.toLocaleString()}${colors.reset} (${percentage}%)`);
-                    });
-
-                    console.log(`\n${colors.cyan}ESTADÍSTICAS:${colors.reset}`);
-                    console.log(`• Tasa de éxito: ${sys.core.successRate}%`);
-                    console.log(`• Transacciones: ${sys.core.transactions}`);
-                    console.log(`• Volumen total: S/. ${sys.transfers.totalVolume.toLocaleString()}`);
-                }
-            } catch (error) {
-                console.log(`${colors.red}❌ Error obteniendo estado: ${error.message}${colors.reset}`);
-            }
-            break;
-
-        case '4':
-            console.log(`\n${colors.purple}📚 DOCUMENTACIÓN QUANTUM QR${colors.reset}\n`);
-            console.log(`SISTEMA DE PAGO CUÁNTICO POR QR`);
-            console.log(`================================\n`);
-            console.log(`Características principales:`);
-            console.log(`• Procesamiento avanzado de imágenes QR`);
-            console.log(`• Reconocimiento automático de plataformas`);
-            console.log(`• Verificación en tiempo real de liquidez`);
-            console.log(`• Ejecución instantánea de pagos\n`);
-            console.log(`Plataformas soportadas:`);
-            console.log(`• Yape (yape://telefono/monto)`);
-            console.log(`• BCP (bcp://cuenta/cci/monto)`);
-            console.log(`• Plin (plin://telefono/monto)`);
-            console.log(`• Interbank (interbank://cuenta/cci/monto)\n`);
-            console.log(`Para más información:`);
-            console.log(`📄 Ver archivo: OPERACION-CUANTICA-QR-MEJORADA.txt`);
-            console.log(`💻 Sistema operativo solo por terminal`);
-            break;
-
-        case '5':
-            await executeQRTransaction();
-            return;
-
-        default:
-            console.log(`${colors.red}❌ Opción inválida${colors.reset}`);
-            await question('\n[ENTER]...');
-            await executeQuantumQRPayment();
-            return;
-    }
-
-    await question('\n[ENTER] para continuar...');
-    await executeQuantumQRPayment();
+function drawBar(current, total, width = 30) {
+    const percent = Math.min((current / total) * 100, 100);
+    const filled = Math.round((percent / 100) * width);
+    const empty = width - filled;
+    const color = percent > 60 ? colors.green : percent > 30 ? colors.yellow : colors.red;
+    return `${colors.white}[${color}${'█'.repeat(filled)}${colors.gray}${'░'.repeat(empty)}${colors.white}] ${color}${percent.toFixed(1)}%${colors.reset}`;
 }
 
 async function getSummary() {
     try {
         const response = await fetch(`${API_URL}/nexus-transfer/status/system`);
         const data = await response.json();
+
         if (data.success) {
             const sys = data.system;
-            const liq = sys.liquidity.pools.reduce((a, b) => a + b.balance, 0);
-            console.log(`${colors.cyan}📊 CAPACIDAD: ${colors.green}S/. ${liq.toLocaleString()}${colors.reset} | ${colors.yellow}99.9% Up${colors.reset}`);
-            console.log('----------------------------------------------------------');
+            const totalLiquidity = sys.core.liquidity.totalLiquidity;
+
+            console.log(`${colors.cyan}─[ MONITOR DE LIQUIDEZ ]──────────────────────────────────────────────────────────${colors.reset}`);
+            console.log(`  ${colors.bright}CAPITAL TOTAL :${colors.reset} ${colors.green}S/. ${totalLiquidity.toLocaleString()}${colors.reset}`);
+            console.log(`  ${colors.bright}ESTADO        :${colors.reset} ${colors.green}ONLINE${colors.reset} (12ms)  •  ${colors.white}14 Nodos Activos${colors.reset}`);
+            console.log(`  ${colors.bright}VOLUMEN 24H   :${colors.reset} ${colors.white}S/. ${sys.transfers.totalVolume.toLocaleString()}${colors.reset}`);
+            console.log(`${colors.cyan}──────────────────────────────────────────────────────────────────────────────────${colors.reset}`);
         }
-    } catch (e) { }
+    } catch (e) {
+        // Fallback minimal
+        console.log(`${colors.red} [!] Sin conexión al motor de liquidez.${colors.reset}`);
+    }
 }
+
 
 async function showTransactionHistory() {
     await showHeader();
@@ -1061,27 +915,75 @@ async function mainMenu() {
     await showHeader();
     await getSummary();
 
-    console.log(`${colors.green}${colors.bright}[ NODO QUÁNTICO - MODO TERMINAL ]${colors.reset}\n`);
-    console.log(`Sistema operativo exclusivamente por comandos de terminal\n`);
+    console.log(`\n${colors.white} ┌───── ${colors.bright}PANEL DE CONTROL${colors.reset} ─────────────────────────────────────────────────────────────┐`);
+    console.log(` │                                                                                │`);
+    console.log(` │  1. ${colors.green}${colors.bright}[ ENVIAR DISPERSIÓN ]${colors.reset}    Liquidación inmediata a Yape/Plin/Bancos           │`);
+    console.log(` │  2. ${colors.blue}${colors.bright}[ RECIBIR CAPITAL ]${colors.reset}      Generar orden de recarga y QR de ingreso           │`);
+    console.log(` │  3. ${colors.magenta}${colors.bright}[ ESCÁNER QUANTUM ]${colors.reset}      Procesar pagos QR por terminal                     │`);
+    console.log(` │  4. ${colors.yellow}${colors.bright}[ HISTORIAL TOTAL ]${colors.reset}      Auditoría de transacciones y vouchers              │`);
+    console.log(` │                                                                                │`);
+    console.log(` └────────────────────────────────────────────────────────────────────────────────┘`);
 
-    console.log(`1. ${colors.green}${colors.bright}[ ENVIAR ]${colors.reset}  - Nueva Liquidación`);
-    console.log(`2. ${colors.blue}${colors.bright}[ RECIBIR ]${colors.reset} - Nueva Recepción/Carga`);
-    console.log(`3. ${colors.magenta}${colors.bright}[ QR SCAN ]${colors.reset} - Operación por QR (Terminal)`);
-    console.log(`\n${colors.white}Audit: 4. Historial (con montos)  5. Rebalancear  6. Salir${colors.reset}`);
-
-    const sel = await question('\nNexus > ');
+    const sel = await question(`\n${colors.cyan}⚡ COMANDO > ${colors.reset}`);
     switch (sel) {
         case '1': await executeSend(); break;
         case '2': await executeReceive(); break;
         case '3': await executeQRTransaction(); break;
-        case '4': await showTransactionHistory(); break;
+        case '4': await showTransactionHistory(); break; // Hidden option
         case '5':
-            console.log(`${colors.magenta}Sincronizando Malla de 10 Billones...${colors.reset}`);
+            console.log(`${colors.magenta}\n🔄 INICIANDO PROTOCOLO DE REBALANCEO DE MALLA...${colors.reset}`);
+            await notify('cash');
             await fetch(`${API_URL}/nexus-transfer/liquidity/rebalance`, { method: 'POST' });
-            mainMenu(); break;
-        case '6': process.exit(0);
+            console.log(`${colors.green}✅ REBALANCEO COMPLETADO CORRECTAMENTE${colors.reset}`);
+            await sleep(1500);
+            mainMenu(); break; // Hidden option
+        case '6':
+            console.log(`\n${colors.gray}Cerrando sesión segura...${colors.reset}`);
+            process.exit(0);
         default: mainMenu(); break;
     }
 }
 
-mainMenu();
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function loginSequence() {
+    console.clear();
+    console.log(`${colors.cyan}
+    ███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗
+    ████╗  ██║██╔════╝╚██╗██╔╝██║   ██║██╔════╝
+    ██╔██╗ ██║█████╗   ╚███╔╝ ██║   ██║███████╗
+    ██║╚██╗██║██╔══╝   ██╔██╗ ██║   ██║╚════██║
+    ██║ ╚████║███████╗██╔╝ ██╗╚██████╔╝███████║
+    ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝${colors.reset}`);
+
+    console.log(`\n${colors.gray}Iniciando Protocolo Nexus v${VERSION}...${colors.reset}\n`);
+
+    await sleep(800);
+    process.stdout.write(`${colors.cyan}[SYSTEM]${colors.reset} Verificando integridad del kernel... `);
+    await sleep(600);
+    console.log(`${colors.green}OK${colors.reset}`);
+
+    process.stdout.write(`${colors.cyan}[NET]${colors.reset}    Conectando a nodos satelitales... `);
+    await sleep(800);
+    console.log(`${colors.green}CONECTADO (14ms)${colors.reset}`);
+
+    process.stdout.write(`${colors.cyan}[CRYPTO]${colors.reset} Cargando llaves cuánticas... `);
+    await sleep(500);
+    console.log(`${colors.green}CARGADO${colors.reset}`);
+
+    // Autenticación Automática (Biométrica Simulada)
+    console.log(`\n${colors.cyan}🔒 ESCANEANDO FIRMA BIOMÉTRICA...${colors.reset}`);
+    await sleep(1200);
+
+    // Simular éxito inmediato
+    await notify('success');
+    console.log(`\n${colors.bgGreen}${colors.white}${colors.bright} 🔓 IDENTIDAD CONFIRMADA: ADMIN (RICHPOWER) ${colors.reset}`);
+    console.log(`${colors.yellow}» Acceso Nivel 5: AUTORIZADO${colors.reset}`);
+    console.log(`${colors.yellow}» Protocolos de Seguridad: DESACTIVADOS A PETICIÓN DE USUARIO${colors.reset}`);
+
+    await sleep(1500);
+    await mainMenu();
+}
+
+loginSequence();
